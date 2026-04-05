@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "django_vite",
     "django_browser_reload",
     "rest_framework",
+    "drf_spectacular",
     "backend",
 ]
 
@@ -142,4 +143,9 @@ DJANGO_VITE = {
         "dev_mode": False if CONTAINERISED else True,
         "manifest_path": BASE_DIR / "dist" / "manifest.json",
     },
+}
+
+# DRF settings
+REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
