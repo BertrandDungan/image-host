@@ -1,4 +1,3 @@
-.openapi-generator-ignore
 apis/ApiApi.ts
 apis/index.ts
 docs/AccountTierEnum.md

@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: ''
+  title: Image-host
   version: 0.0.0
 paths:
   /api/users/:

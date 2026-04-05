@@ -149,3 +149,6 @@ DJANGO_VITE = {
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
+
+# Spectacular DRF
+SPECTACULAR_SETTINGS = {"SCHEMA_PATH_PREFIX": "api/", "TITLE": "Image-host"}

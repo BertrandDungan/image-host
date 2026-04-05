@@ -20,7 +20,7 @@ from django.urls import path, include
 from backend.views.react_view import ReactView
 from rest_framework.routers import DefaultRouter
 from backend.views.user_view import UserViewSet
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from drf_spectacular.views import SpectacularSwaggerView
 
 router = DefaultRouter()
 router.register(r"users", UserViewSet)
@@ -28,7 +28,6 @@ router.register(r"users", UserViewSet)
 urlpatterns = [
     path("__reload__/", include("django_browser_reload.urls")),
     path("admin/", admin.site.urls),
-    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path(
         "api/schema/swagger-ui/",
         SpectacularSwaggerView.as_view(url_name="schema"),
