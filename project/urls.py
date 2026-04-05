@@ -18,10 +18,16 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from backend.views.react_view import ReactView
+from rest_framework.routers import DefaultRouter
+from backend.views.user_view import UserViewSet
+
+router = DefaultRouter()
+router.register(r"users", UserViewSet)
 
 urlpatterns = [
     path("__reload__/", include("django_browser_reload.urls")),
     path("admin/", admin.site.urls),
+    path("api/", include((router.urls))),
     path("", ReactView.as_view(), name="index"),
     path(r"<path:path>", ReactView.as_view(), name="index_with_path"),
 ]
