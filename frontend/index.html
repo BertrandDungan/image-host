@@ -1,0 +1,20 @@
+{% load django_vite %}
+{% vite_react_refresh %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Getting Started with Django and Vite{% endblock %}</title>
+  {% vite_hmr_client %}
+  <link rel="stylesheet" href="{% vite_asset_url 'frontend/style.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+
+<body>
+  <div id="root" class="container mx-auto mt-4"></div>
+  {% vite_asset 'frontend/index.tsx' %}
+</body>
+
+</html>

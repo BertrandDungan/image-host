@@ -1,0 +1,1 @@
+This codebase was adapted from the steps in [Modern JavaScript for Django Developers](https://www.saaspegasus.com/guides/modern-javascript-for-django-developers/).
