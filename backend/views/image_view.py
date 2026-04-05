@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 from io import BytesIO
-from os import path
+from typing import NamedTuple
+
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from PIL import Image as PILImage, UnidentifiedImageError
@@ -19,52 +22,71 @@ _FILENAME_FIELD = "filename"
 
 
 class ImageView(APIView):
+    class _ValidatedPutPayload(NamedTuple):
+        owner: User
+        title: str
+        raw: bytes
+        image_format: str
+
     parser_classes = [MultiPartParser]
 
     def put(self, request: Request) -> Response:
+        payload, error = self._validate_put(request)
+        if error is not None:
+            return error
+        assert payload is not None
+        return self._save_validated_image(payload)
+
+    def _validate_put(
+        self, request: Request
+    ) -> tuple[ImageView._ValidatedPutPayload | None, Response | None]:
+        """
+        Returns a tuple of either the validated payload or
+        an error response if it fails validation
+        """
         user_id_raw = request.data.get(_USER_ID_FIELD)
         if user_id_raw is None or user_id_raw == "":
-            return Response(
+            return None, Response(
                 {"detail": f"Missing '{_USER_ID_FIELD}'."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         try:
             user_id = int(user_id_raw)
         except (TypeError, ValueError):
-            return Response(
+            return None, Response(
                 {"detail": f"Invalid '{_USER_ID_FIELD}'."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         filename_raw = request.data.get(_FILENAME_FIELD)
         if not isinstance(filename_raw, str):
-            return Response(
+            return None, Response(
                 {"detail": f"Invalid '{_FILENAME_FIELD}'."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        title = path.basename(filename_raw.strip())
+        title = filename_raw.strip()
         if not title:
-            return Response(
+            return None, Response(
                 {"detail": f"'{_FILENAME_FIELD}' must be a non-empty filename."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         if len(title) > MAX_STRING_LENGTH:
-            return Response(
+            return None, Response(
                 {"detail": "Filename exceeds maximum length."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         upload = request.FILES.get(_UPLOAD_FIELD)
         if upload is None:
-            return Response(
+            return None, Response(
                 {"detail": f"Missing multipart file field '{_UPLOAD_FIELD}'."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         raw = upload.read()
         if not raw:
-            return Response(
+            return None, Response(
                 {"detail": "The uploaded file is empty."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
@@ -74,13 +96,13 @@ class ImageView(APIView):
                 image_format = img.format
                 img.verify()
         except (UnidentifiedImageError, OSError):
-            return Response(
+            return None, Response(
                 {"detail": "The uploaded file is not a valid image."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         if image_format not in _ALLOWED_PIL_FORMATS:
-            return Response(
+            return None, Response(
                 {"detail": "Only PNG and JPEG images are accepted."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
@@ -88,15 +110,25 @@ class ImageView(APIView):
         try:
             owner = User.objects.get(pk=user_id)
         except User.DoesNotExist:
-            return Response(
+            return None, Response(
                 {"detail": f"No user exists with the given id: {user_id}."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        instance = Image(title=title, owner=owner)
+        return (
+            self._ValidatedPutPayload(
+                owner=owner, title=title, raw=raw, image_format=image_format
+            ),
+            None,
+        )
+
+    def _save_validated_image(
+        self, payload: ImageView._ValidatedPutPayload
+    ) -> Response:
+        instance = Image(title=payload.title, owner=payload.owner)
         # UUID so that that no saved files collide
-        storage_name = f"{uuid4()}.{image_format.lower()}"
-        instance.image.save(storage_name, ContentFile(raw), save=False)
+        storage_name = f"{uuid4()}.{payload.image_format.lower()}"
+        instance.image.save(storage_name, ContentFile(payload.raw), save=False)
         try:
             instance.full_clean()
         except ValidationError as exc:
