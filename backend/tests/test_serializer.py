@@ -4,7 +4,7 @@ from rest_framework.fields import DateTimeField as DRFSerializerDateTimeField
 
 from backend.models import AccountTier, Image, Share_Link, User
 from backend.serializer import ImageSerializer, Share_LinkSerializer, UserSerializer
-from .stubs import stub_png_upload
+from .stubs import stub_image_upload
 
 
 class UserSerializerTests(TestCase):
@@ -36,7 +36,7 @@ class ImageSerializerTests(TestCase):
     def test_serialize_outputs_expected_format(self) -> None:
         owner = User.objects.create(name="owner", account_tier=AccountTier.BASIC)
         image = Image.objects.create(
-            title="Photo", owner=owner, image=stub_png_upload("photo.png")
+            title="Photo", owner=owner, image=stub_image_upload("photo.png")
         )
         data = ImageSerializer(image).data
         self.assertEqual(
@@ -52,13 +52,13 @@ class ImageSerializerTests(TestCase):
     def test_create_rejects_missing_title(self) -> None:
         owner = User.objects.create(name="o", account_tier=AccountTier.BASIC)
         serializer = ImageSerializer(
-            data={"owner": owner.pk, "image": stub_png_upload()}
+            data={"owner": owner.pk, "image": stub_image_upload()}
         )
         self.assertFalse(serializer.is_valid())
         self.assertIn("title", serializer.errors)
 
     def test_create_rejects_missing_owner(self) -> None:
-        serializer = ImageSerializer(data={"title": "t", "image": stub_png_upload()})
+        serializer = ImageSerializer(data={"title": "t", "image": stub_image_upload()})
         self.assertFalse(serializer.is_valid())
         self.assertIn("owner", serializer.errors)
 
@@ -70,14 +70,14 @@ class ImageSerializerTests(TestCase):
 
     def test_create_rejects_nonexistent_owner(self) -> None:
         serializer = ImageSerializer(
-            data={"title": "t", "owner": 999_999, "image": stub_png_upload()}
+            data={"title": "t", "owner": 999_999, "image": stub_image_upload()}
         )
         self.assertFalse(serializer.is_valid())
         self.assertIn("owner", serializer.errors)
 
     def test_create_saves_image_to_storage(self) -> None:
         owner = User.objects.create(name="o", account_tier=AccountTier.BASIC)
-        upload = stub_png_upload("saved.png")
+        upload = stub_image_upload("saved.png")
         serializer = ImageSerializer(
             data={"title": "Peak", "owner": owner.pk, "image": upload}
         )
@@ -96,7 +96,7 @@ class Share_LinkSerializerTests(TestCase):
     def setUp(self) -> None:
         self.owner = User.objects.create(name="o", account_tier=AccountTier.BASIC)
         self.image = Image.objects.create(
-            title="i", owner=self.owner, image=stub_png_upload()
+            title="i", owner=self.owner, image=stub_image_upload()
         )
         self.expiry = timezone.now()
 

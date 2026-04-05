@@ -168,7 +168,7 @@ requires-dist = [
     { name = "django-vite", specifier = "==3.1.0" },
     { name = "djangorestframework", specifier = "==3.17.1" },
     { name = "drf-spectacular", specifier = "==0.29.0" },
-    { name = "pillow", specifier = ">=12.2.0" },
+    { name = "pillow", specifier = "==12.2.0" },
 ]
 
 [package.metadata.requires-dev]
