@@ -151,4 +151,4 @@ REST_FRAMEWORK = {
 }
 
 # Spectacular DRF
-SPECTACULAR_SETTINGS = {"SCHEMA_PATH_PREFIX": "api/", "TITLE": "Image-host"}
+SPECTACULAR_SETTINGS = {"SCHEMA_PATH_PREFIX": "/api/", "TITLE": "Image-host"}

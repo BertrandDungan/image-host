@@ -5,9 +5,9 @@ info:
 paths:
   /api/users/:
     get:
-      operationId: api_users_list
+      operationId: users_list
       tags:
-      - api
+      - users
       security:
       - cookieAuth: []
       - basicAuth: []
@@ -23,7 +23,7 @@ paths:
           description: ''
   /api/users/{id}/:
     get:
-      operationId: api_users_retrieve
+      operationId: users_retrieve
       parameters:
       - in: path
         name: id
@@ -32,7 +32,7 @@ paths:
         description: A unique integer value identifying this user.
         required: true
       tags:
-      - api
+      - users
       security:
       - cookieAuth: []
       - basicAuth: []

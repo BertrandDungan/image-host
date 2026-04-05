@@ -1,8 +1,8 @@
-apis/ApiApi.ts
+apis/UsersApi.ts
 apis/index.ts
 docs/AccountTierEnum.md
-docs/ApiApi.md
 docs/User.md
+docs/UsersApi.md
 index.ts
 models/AccountTierEnum.ts
 models/User.ts
