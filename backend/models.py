@@ -18,6 +18,7 @@ class User(models.Model):
 class Image(models.Model):
     title = models.CharField(max_length=255)
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to="images/")
 
 
 class Share_Link(models.Model):
