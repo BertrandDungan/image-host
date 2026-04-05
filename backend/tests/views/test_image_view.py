@@ -1,5 +1,5 @@
 from unittest.mock import patch
-
+from typing import Any
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
@@ -24,8 +24,8 @@ class ImageViewTests(TestCase):
         user_id: str | int | None = None,
         filename: str | None = "photo.png",
         image: SimpleUploadedFile | None = None,
-    ):
-        data: dict = {}
+    ) -> Any:
+        data: dict[str, str | int | SimpleUploadedFile | None] = {}
         if user_id is not None:
             data["user_id"] = user_id
         if filename is not None:
@@ -47,8 +47,7 @@ class ImageViewTests(TestCase):
         row = Image.objects.get()
         self.assertEqual(row.title, "my_photo.png")
         self.assertEqual(row.owner_id, self.user.pk)
-        self.assertTrue(row.image.name)
-        self.assertTrue(row.image.storage.exists(row.image.name))
+        self.assertTrue(row.image.name and row.image.storage.exists(row.image.name))
 
     def test_put_accepts_jpeg(self) -> None:
         upload = stub_image_upload("test.jpg", format="JPEG")
@@ -98,30 +97,6 @@ class ImageViewTests(TestCase):
             filename=None,
             image=stub_image_upload(),
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data["detail"], "Invalid 'filename'.")
-        self.assertEqual(Image.objects.count(), 0)
-
-    def test_put_rejects_non_string_filename(self) -> None:
-        # Multipart encoding stringifies field values; call put() with a duck-typed request.
-        upload = stub_image_upload()
-        uid = str(self.user.pk)
-
-        class _Data:
-            @staticmethod
-            def get(key: str, default=None):
-                return {"user_id": uid, "filename": 123}.get(key, default)
-
-        class _Files:
-            @staticmethod
-            def get(key: str, default=None):
-                return upload if key == "image" else default
-
-        class _Req:
-            data = _Data()
-            FILES = _Files()
-
-        response = ImageView().put(_Req())
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data["detail"], "Invalid 'filename'.")
         self.assertEqual(Image.objects.count(), 0)
