@@ -89,6 +89,8 @@ DATABASES = {
     }
 }
 
+# File storage location
+MEDIA_ROOT = BASE_DIR / "backend" / "images"
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
