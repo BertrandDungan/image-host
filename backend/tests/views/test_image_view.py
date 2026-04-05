@@ -1,13 +1,20 @@
+from io import BytesIO
 from unittest.mock import patch
 from typing import Any
+
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
+from PIL import Image as PILImage
 from rest_framework import status
 from rest_framework.test import APIRequestFactory
 
-from backend.models import MAX_STRING_LENGTH, AccountTier, Image, User
-from backend.views.image_view import ImageView
+from backend.models import MAX_STRING_LENGTH, AccountTier, Image, ImageSize, User
+from backend.views.image_view import (
+    ImageView,
+    _MEDIUM_THUMB_MAX_PX,
+    _SMALL_THUMB_MAX_PX,
+)
 
 from ..stubs import stub_image_upload
 
@@ -43,11 +50,47 @@ class ImageViewTests(TestCase):
             image=upload,
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertEqual(Image.objects.count(), 1)
-        row = Image.objects.get()
-        self.assertEqual(row.title, "my_photo.png")
-        self.assertEqual(row.owner_id, self.user.pk)
-        self.assertTrue(row.image.name and row.image.storage.exists(row.image.name))
+        self.assertEqual(Image.objects.count(), 3)
+        by_size = {row.size: row for row in Image.objects.all()}
+        self.assertEqual(set(by_size), set(ImageSize.values))
+        for row in by_size.values():
+            self.assertEqual(row.title, "my_photo.png")
+            self.assertEqual(row.owner_id, self.user.pk)
+            self.assertTrue(row.image.name and row.image.storage.exists(row.image.name))
+
+    def test_put_saves_three_sizes_with_expected_dimensions(self) -> None:
+        orig_w, orig_h = 1200, 800
+        buffer = BytesIO()
+        PILImage.new("RGB", (orig_w, orig_h), color=(10, 20, 30)).save(
+            buffer, format="PNG"
+        )
+        upload = SimpleUploadedFile(
+            "large.png", buffer.getvalue(), content_type="image/png"
+        )
+        response = self._put(
+            user_id=self.user.pk,
+            filename="large.png",
+            image=upload,
+        )
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(Image.objects.count(), 3)
+        by_size = {row.size: row for row in Image.objects.all()}
+
+        small = by_size[ImageSize.SMALL_THUMBNAIL]
+        self.assertLessEqual(small.image.width, _SMALL_THUMB_MAX_PX)
+        self.assertLessEqual(small.image.height, _SMALL_THUMB_MAX_PX)
+        self.assertEqual(max(small.image.width, small.image.height), _SMALL_THUMB_MAX_PX)
+
+        medium = by_size[ImageSize.MEDIUM_THUMBNAIL]
+        self.assertLessEqual(medium.image.width, _MEDIUM_THUMB_MAX_PX)
+        self.assertLessEqual(medium.image.height, _MEDIUM_THUMB_MAX_PX)
+        self.assertEqual(
+            max(medium.image.width, medium.image.height), _MEDIUM_THUMB_MAX_PX
+        )
+
+        original = by_size[ImageSize.ORIGINAL]
+        self.assertEqual(original.image.width, orig_w)
+        self.assertEqual(original.image.height, orig_h)
 
     def test_put_accepts_jpeg(self) -> None:
         upload = stub_image_upload("test.jpg", format="JPEG")
@@ -57,17 +100,20 @@ class ImageViewTests(TestCase):
             image=upload,
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertEqual(Image.objects.count(), 1)
+        self.assertEqual(Image.objects.count(), 3)
 
-    def test_put_strips_path_from_filename_for_title(self) -> None:
+    def test_put_uses_trimmed_filename_for_title(self) -> None:
         upload = stub_image_upload()
+        filename = "  folder/nested/name.png  "
         response = self._put(
             user_id=self.user.pk,
-            filename="  folder/nested/name.png  ",
+            filename=filename,
             image=upload,
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertEqual(Image.objects.get().title, "name.png")
+        self.assertEqual(Image.objects.count(), 3)
+        expected_title = filename.strip()
+        self.assertTrue(all(row.title == expected_title for row in Image.objects.all()))
 
     def test_put_rejects_missing_user_id(self) -> None:
         response = self._put(user_id=None, filename="a.png", image=stub_image_upload())

@@ -5,6 +5,7 @@ from typing import NamedTuple
 
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
+from django.db import transaction
 from PIL import Image as PILImage, UnidentifiedImageError
 from rest_framework.parsers import MultiPartParser
 from rest_framework.request import Request
@@ -13,9 +14,11 @@ from rest_framework.views import APIView
 from rest_framework import status
 from uuid import uuid4
 
-from backend.models import MAX_STRING_LENGTH, Image, User
+from backend.models import MAX_STRING_LENGTH, Image, ImageSize, User
 
 _ALLOWED_PIL_FORMATS = frozenset({"PNG", "JPEG"})
+_SMALL_THUMB_MAX_PX = 150
+_MEDIUM_THUMB_MAX_PX = 600
 _UPLOAD_FIELD = "image"
 _USER_ID_FIELD = "user_id"
 _FILENAME_FIELD = "filename"
@@ -122,17 +125,43 @@ class ImageView(APIView):
             None,
         )
 
+    def _thumbnail_bytes(self, raw: bytes, max_dimension: int) -> bytes:
+        """
+        Scales image down in place to a thumbnail square of a maximum size
+        """
+        out = BytesIO()
+        with PILImage.open(BytesIO(raw)) as img:
+            img.load()
+            img.thumbnail((max_dimension, max_dimension))
+            img.save(out)
+        return out.getvalue()
+
     def _save_validated_image(
         self, payload: ImageView._ValidatedPutPayload
     ) -> Response:
-        instance = Image(title=payload.title, owner=payload.owner)
-        # UUID so that that no saved files collide
-        storage_name = f"{uuid4()}.{payload.image_format.lower()}"
-        instance.image.save(storage_name, ContentFile(payload.raw), save=False)
+        medium_bytes = self._thumbnail_bytes(payload.raw, _MEDIUM_THUMB_MAX_PX)
+        small_bytes = self._thumbnail_bytes(payload.raw, _SMALL_THUMB_MAX_PX)
+
+        variants: tuple[tuple[ImageSize, bytes], ...] = (
+            (ImageSize.SMALL_THUMBNAIL, small_bytes),
+            (ImageSize.MEDIUM_THUMBNAIL, medium_bytes),
+            (ImageSize.ORIGINAL, payload.raw),
+        )
+
+        base_id = uuid4()
         try:
-            instance.full_clean()
+            with transaction.atomic():
+                for size, data in variants:
+                    instance = Image(
+                        title=payload.title,
+                        owner=payload.owner,
+                        size=size,
+                    )
+                    storage_name = f"{base_id}_{size}.{payload.image_format.lower()}"
+                    instance.image.save(storage_name, ContentFile(data), save=False)
+                    instance.full_clean()
+                    instance.save()
         except ValidationError as exc:
             return Response(exc.message_dict, status=status.HTTP_400_BAD_REQUEST)
-        instance.save()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
