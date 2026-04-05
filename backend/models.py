@@ -9,6 +9,12 @@ class AccountTier(models.TextChoices):
     ENTERPRISE = "Enterprise"
 
 
+class ImageSize(models.TextChoices):
+    SMALL_THUMBNAIL = "small"
+    MEDIUM_THUMBNAIL = "medium"
+    ORIGINAL = "original"
+
+
 class User(models.Model):
     name = models.CharField(max_length=MAX_STRING_LENGTH)
     account_tier = models.CharField(
@@ -21,6 +27,10 @@ class Image(models.Model):
     title = models.CharField(max_length=MAX_STRING_LENGTH)
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     image = models.ImageField(upload_to="images/")
+    size = models.CharField(
+        max_length=20,
+        choices=ImageSize.choices,
+    )
 
 
 class Share_Link(models.Model):
