@@ -17,7 +17,7 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
-from backend.views import ReactView
+from backend.views.react_view import ReactView
 
 urlpatterns = [
     path("__reload__/", include("django_browser_reload.urls")),
