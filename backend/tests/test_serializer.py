@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.utils import timezone
 from rest_framework.fields import DateTimeField as DRFSerializerDateTimeField
 
-from backend.models import AccountTier, Image, Share_Link, User
+from backend.models import AccountTier, Image, ImageSize, Share_Link, User
 from backend.serializer import ImageSerializer, Share_LinkSerializer, UserSerializer
 from .stubs import stub_image_upload
 
@@ -36,7 +36,10 @@ class ImageSerializerTests(TestCase):
     def test_serialize_outputs_expected_format(self) -> None:
         owner = User.objects.create(name="owner", account_tier=AccountTier.BASIC)
         image = Image.objects.create(
-            title="Photo", owner=owner, image=stub_image_upload("photo.png")
+            title="Photo",
+            owner=owner,
+            image=stub_image_upload("photo.png"),
+            size=ImageSize.ORIGINAL,
         )
         data = ImageSerializer(image).data
         self.assertEqual(
@@ -46,44 +49,76 @@ class ImageSerializerTests(TestCase):
                 "title": "Photo",
                 "owner": owner.pk,
                 "image": image.image.url,
+                "size": ImageSize.ORIGINAL,
             },
         )
 
     def test_create_rejects_missing_title(self) -> None:
         owner = User.objects.create(name="o", account_tier=AccountTier.BASIC)
         serializer = ImageSerializer(
-            data={"owner": owner.pk, "image": stub_image_upload()}
+            data={
+                "owner": owner.pk,
+                "image": stub_image_upload(),
+                "size": ImageSize.MEDIUM_THUMBNAIL,
+            }
         )
         self.assertFalse(serializer.is_valid())
         self.assertIn("title", serializer.errors)
 
     def test_create_rejects_missing_owner(self) -> None:
-        serializer = ImageSerializer(data={"title": "t", "image": stub_image_upload()})
+        serializer = ImageSerializer(
+            data={
+                "title": "t",
+                "image": stub_image_upload(),
+                "size": ImageSize.MEDIUM_THUMBNAIL,
+            }
+        )
         self.assertFalse(serializer.is_valid())
         self.assertIn("owner", serializer.errors)
 
     def test_create_rejects_missing_image(self) -> None:
         owner = User.objects.create(name="o", account_tier=AccountTier.BASIC)
-        serializer = ImageSerializer(data={"title": "t", "owner": owner.pk})
+        serializer = ImageSerializer(
+            data={"title": "t", "owner": owner.pk, "size": ImageSize.MEDIUM_THUMBNAIL}
+        )
         self.assertFalse(serializer.is_valid())
         self.assertIn("image", serializer.errors)
 
     def test_create_rejects_nonexistent_owner(self) -> None:
         serializer = ImageSerializer(
-            data={"title": "t", "owner": 999_999, "image": stub_image_upload()}
+            data={
+                "title": "t",
+                "owner": 999_999,
+                "image": stub_image_upload(),
+                "size": ImageSize.MEDIUM_THUMBNAIL,
+            }
         )
         self.assertFalse(serializer.is_valid())
         self.assertIn("owner", serializer.errors)
+
+    def test_create_rejects_missing_size(self) -> None:
+        owner = User.objects.create(name="o", account_tier=AccountTier.BASIC)
+        serializer = ImageSerializer(
+            data={"title": "t", "owner": owner.pk, "image": stub_image_upload()}
+        )
+        self.assertFalse(serializer.is_valid())
+        self.assertIn("size", serializer.errors)
 
     def test_create_saves_image_to_storage(self) -> None:
         owner = User.objects.create(name="o", account_tier=AccountTier.BASIC)
         upload = stub_image_upload("saved.png")
         serializer = ImageSerializer(
-            data={"title": "Peak", "owner": owner.pk, "image": upload}
+            data={
+                "title": "Peak",
+                "owner": owner.pk,
+                "image": upload,
+                "size": ImageSize.SMALL_THUMBNAIL,
+            }
         )
         self.assertTrue(serializer.is_valid(), serializer.errors)
         instance = serializer.save()
         instance.refresh_from_db()
+        self.assertEqual(instance.size, ImageSize.SMALL_THUMBNAIL)
         self.assertTrue(
             instance.image.name and instance.image.name.startswith("images/")
         )
@@ -96,7 +131,10 @@ class Share_LinkSerializerTests(TestCase):
     def setUp(self) -> None:
         self.owner = User.objects.create(name="o", account_tier=AccountTier.BASIC)
         self.image = Image.objects.create(
-            title="i", owner=self.owner, image=stub_image_upload()
+            title="i",
+            owner=self.owner,
+            image=stub_image_upload(),
+            size=ImageSize.ORIGINAL,
         )
         self.expiry = timezone.now()
 
