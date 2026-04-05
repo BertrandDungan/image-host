@@ -11,7 +11,7 @@ class UserSerializer(serializers.ModelSerializer[User]):
 class ImageSerializer(serializers.ModelSerializer[Image]):
     class Meta:
         model = Image
-        fields = ["id", "title", "owner"]
+        fields = ["id", "title", "owner", "image"]
 
 
 class Share_LinkSerializer(serializers.ModelSerializer[Share_Link]):

@@ -130,8 +130,8 @@ STATICFILES_DIRS = [
     BASE_DIR / "dist",
 ]
 
-# File storage location
-MEDIA_ROOT = STATICFILES_DIRS / "images"
+# File storage location alongside static assets
+MEDIA_ROOT = BASE_DIR / "dist" / "images"
 
 
 # Default primary key field type
