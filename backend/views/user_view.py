@@ -1,5 +1,4 @@
 from rest_framework import viewsets
-
 from backend.models import User
 from backend.serializer import UserSerializer
 
