@@ -1,0 +1,11 @@
+.openapi-generator-ignore
+apis/ApiApi.ts
+apis/index.ts
+docs/AccountTierEnum.md
+docs/ApiApi.md
+docs/User.md
+index.ts
+models/AccountTierEnum.ts
+models/User.ts
+models/index.ts
+runtime.ts

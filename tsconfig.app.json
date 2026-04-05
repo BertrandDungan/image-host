@@ -30,5 +30,8 @@
   },
   "include": [
     "frontend"
+  ],
+  "exclude": [
+    "frontend/api-client"
   ]
 }
