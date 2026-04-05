@@ -89,9 +89,6 @@ DATABASES = {
     }
 }
 
-# File storage location
-MEDIA_ROOT = BASE_DIR / "backend" / "images"
-
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
@@ -132,6 +129,9 @@ STATIC_URL = "dist/"
 STATICFILES_DIRS = [
     BASE_DIR / "dist",
 ]
+
+# File storage location
+MEDIA_ROOT = STATICFILES_DIRS / "images"
 
 
 # Default primary key field type
