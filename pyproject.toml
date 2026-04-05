@@ -1,18 +1,25 @@
 [project]
-name = "vite-demo"
+name = "image-host"
 version = "0.1.0"
-description = "Add your description here"
+description = "Small image hosting service"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "django==6.0.3",
     "django-browser-reload==1.21.0",
-    "django-vite==3.1.0"
+    "django-stubs[compatible-mypy]==6.0.2",
+    "django-vite==3.1.0",
 ]
+
 [dependency-groups]
 dev = [
     "mypy==1.20.0",
     "django-stubs==6.0.2"
 ]
+
 [tool.mypy]
 strict = true
+plugins = ["mypy_django_plugin.main"]
+
+[tool.django-stubs]
+django_settings_module = "project.settings"

@@ -53,6 +53,11 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/49/e7/8f2aaa22eac7fa18db3aca0e7b651ccf5ac79a2021bf67e75a16934a7076/django_stubs-6.0.2-py3-none-any.whl", hash = "sha256:c3bc84d80421758f3b2ad9e1358e001d719388a8eb106e67c873e606216108d4", size = 538234, upload-time = "2026-04-01T08:27:33.411Z" },
 ]
 
+[package.optional-dependencies]
+compatible-mypy = [
+    { name = "mypy" },
+]
+
 [[package]]
 name = "django-stubs-ext"
 version = "6.0.2"
@@ -242,6 +247,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "django" },
     { name = "django-browser-reload" },
+    { name = "django-stubs", extra = ["compatible-mypy"] },
     { name = "django-vite" },
 ]
 
@@ -255,6 +261,7 @@ dev = [
 requires-dist = [
     { name = "django", specifier = "==6.0.3" },
     { name = "django-browser-reload", specifier = "==1.21.0" },
+    { name = "django-stubs", extras = ["compatible-mypy"], specifier = "==6.0.2" },
     { name = "django-vite", specifier = "==3.1.0" },
 ]
 
