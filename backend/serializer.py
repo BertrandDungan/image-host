@@ -86,10 +86,20 @@ class ImagePutErrorSerializer(serializers.Serializer[Any]):
     )
 
 
-class ImageGetUrlsResponseSerializer(serializers.Serializer[Any]):
-    """JSON body listing absolute URLs for the requested size."""
+class ImageListItemSerializer(serializers.Serializer[Any]):
+    """One image variant: database id and absolute URL."""
 
-    urls = serializers.ListField(
-        child=serializers.URLField(),
-        help_text="Absolute URLs of stored images for the user and size.",
+    id = serializers.IntegerField(
+        help_text="Primary key of the `Image` row for this size."
+    )
+    url = serializers.URLField(
+        help_text="Absolute URL to the stored file for this size."
+    )
+
+
+class ImageGetUrlsResponseSerializer(serializers.Serializer[Any]):
+    """JSON body listing image ids and absolute URLs for the requested size."""
+
+    items = ImageListItemSerializer(
+        many=True,
     )

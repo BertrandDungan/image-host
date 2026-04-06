@@ -43,10 +43,11 @@ class ImageView(APIView):
     parser_classes = [MultiPartParser]
 
     @extend_schema(
-        summary="List image URLs by user and size",
+        summary="List image ids and URLs by user and size",
         description=(
-            "Returns absolute URLs for all images owned by the user at the given "
-            "size. Medium thumbnails and originals require Premium or Enterprise."
+            "Returns each image's id and absolute URL for an image owned by the "
+            "user at the given size. Medium thumbnails and originals require Premium "
+            "or Enterprise."
         ),
         tags=["images"],
         parameters=[
@@ -69,7 +70,7 @@ class ImageView(APIView):
         responses={
             status.HTTP_200_OK: OpenApiResponse(
                 response=ImageGetUrlsResponseSerializer,
-                description="Matching image URLs (may be empty).",
+                description="Matching image ids and URLs (may be empty).",
             ),
             status.HTTP_400_BAD_REQUEST: OpenApiResponse(
                 response=ImagePutErrorSerializer,
@@ -131,11 +132,14 @@ class ImageView(APIView):
                     status=status.HTTP_403_FORBIDDEN,
                 )
 
-        urls = [
-            request.build_absolute_uri(row.image.url)
+        items = [
+            {
+                "id": row.id,
+                "url": request.build_absolute_uri(row.image.url),
+            }
             for row in Image.objects.filter(owner_id=user_id, size=size).order_by("id")
         ]
-        return Response({"urls": urls})
+        return Response({"items": items})
 
     @extend_schema(
         summary="Upload image",

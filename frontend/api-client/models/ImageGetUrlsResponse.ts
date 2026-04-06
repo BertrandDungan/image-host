@@ -13,25 +13,33 @@
  */
 
 import { mapValues } from '../runtime';
+import type { ImageListItem } from './ImageListItem';
+import {
+    ImageListItemFromJSON,
+    ImageListItemFromJSONTyped,
+    ImageListItemToJSON,
+    ImageListItemToJSONTyped,
+} from './ImageListItem';
+
 /**
- * JSON body listing absolute URLs for the requested size.
+ * JSON body listing image ids and absolute URLs for the requested size.
  * @export
  * @interface ImageGetUrlsResponse
  */
 export interface ImageGetUrlsResponse {
     /**
-     * Absolute URLs of stored images for the user and size.
-     * @type {Array<string>}
+     * 
+     * @type {Array<ImageListItem>}
      * @memberof ImageGetUrlsResponse
      */
-    urls: Array<string>;
+    items: Array<ImageListItem>;
 }
 
 /**
  * Check if a given object implements the ImageGetUrlsResponse interface.
  */
 export function instanceOfImageGetUrlsResponse(value: object): value is ImageGetUrlsResponse {
-    if (!('urls' in value) || value['urls'] === undefined) return false;
+    if (!('items' in value) || value['items'] === undefined) return false;
     return true;
 }
 
@@ -45,7 +53,7 @@ export function ImageGetUrlsResponseFromJSONTyped(json: any, ignoreDiscriminator
     }
     return {
         
-        'urls': json['urls'],
+        'items': ((json['items'] as Array<any>).map(ImageListItemFromJSON)),
     };
 }
 
@@ -60,7 +68,7 @@ export function ImageGetUrlsResponseToJSONTyped(value?: ImageGetUrlsResponse | n
 
     return {
         
-        'urls': value['urls'],
+        'items': ((value['items'] as Array<any>).map(ImageListItemToJSON)),
     };
 }
 

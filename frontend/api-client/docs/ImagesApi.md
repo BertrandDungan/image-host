@@ -4,7 +4,7 @@ All URIs are relative to *http://localhost*
 
 | Method | HTTP request | Description |
 |------------- | ------------- | -------------|
-| [**imagesRetrieve**](ImagesApi.md#imagesretrieve) | **GET** /api/images/ | List image URLs by user and size |
+| [**imagesRetrieve**](ImagesApi.md#imagesretrieve) | **GET** /api/images/ | List image ids and URLs by user and size |
 | [**imagesUpdate**](ImagesApi.md#imagesupdate) | **PUT** /api/images/ | Upload image |
 
 
@@ -13,9 +13,9 @@ All URIs are relative to *http://localhost*
 
 > ImageGetUrlsResponse imagesRetrieve(imageSize, userId)
 
-List image URLs by user and size
+List image ids and URLs by user and size
 
-Returns absolute URLs for all images owned by the user at the given size. Medium thumbnails and originals require Premium or Enterprise.
+Returns each image\&#39;s id and absolute URL for an image owned by the user at the given size. Medium thumbnails and originals require Premium or Enterprise.
 
 ### Example
 
@@ -81,7 +81,7 @@ example().catch(console.error);
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-| **200** | Matching image URLs (may be empty). |  -  |
+| **200** | Matching image ids and URLs (may be empty). |  -  |
 | **400** | Missing or invalid query parameters, or unknown user. |  -  |
 | **403** | Account tier does not allow this image size. |  -  |
 

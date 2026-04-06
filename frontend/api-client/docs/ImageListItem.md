@@ -1,23 +1,25 @@
 
-# ImageGetUrlsResponse
+# ImageListItem
 
-JSON body listing image ids and absolute URLs for the requested size.
+One image variant: database id and absolute URL.
 
 ## Properties
 
 Name | Type
 ------------ | -------------
-`items` | [Array&lt;ImageListItem&gt;](ImageListItem.md)
+`id` | number
+`url` | string
 
 ## Example
 
 ```typescript
-import type { ImageGetUrlsResponse } from ''
+import type { ImageListItem } from ''
 
 // TODO: Update the object below with actual values
 const example = {
-  "items": null,
-} satisfies ImageGetUrlsResponse
+  "id": null,
+  "url": null,
+} satisfies ImageListItem
 
 console.log(example)
 
@@ -26,7 +28,7 @@ const exampleJSON: string = JSON.stringify(example)
 console.log(exampleJSON)
 
 // Parse the JSON string back to an object
-const exampleParsed = JSON.parse(exampleJSON) as ImageGetUrlsResponse
+const exampleParsed = JSON.parse(exampleJSON) as ImageListItem
 console.log(exampleParsed)
 ```
 

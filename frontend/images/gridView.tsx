@@ -91,7 +91,7 @@ function GridView({ currentUser }: { currentUser: User | null }) {
         if (!cancelled) {
           setUrls((prev) => ({
             ...prev,
-            [thumbnailKey]: res.urls,
+            [thumbnailKey]: res.items.map((i) => i.url),
           }));
         }
       })
@@ -126,7 +126,10 @@ function GridView({ currentUser }: { currentUser: User | null }) {
       })
       .then((res) => {
         if (!cancelled) {
-          setUrls((prev) => ({ ...prev, originals: res.urls }));
+          setUrls((prev) => ({
+            ...prev,
+            originals: res.items.map((i) => i.url),
+          }));
         }
       })
       .catch(() => {

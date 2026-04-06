@@ -263,16 +263,16 @@ class ImageViewTests(StubMediaTestCase):
     def test_get_returns_small_thumbnail_urls_for_basic_tier(self) -> None:
         upload = stub_image_upload("a.png")
         self._put(user_id=self.user.pk, filename="a.png", image=upload)
+        small = Image.objects.get(size=ImageSize.SMALL_THUMBNAIL)
         response = self._get(
             user_id=self.user.pk,
             image_size=ImageSize.SMALL_THUMBNAIL.value,
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data["urls"]), 1)
+        self.assertEqual(len(response.data["items"]), 1)
+        self.assertEqual(response.data["items"][0]["id"], small.id)
         self.assertTrue(
-            response.data["urls"][0].endswith(
-                Image.objects.get(size=ImageSize.SMALL_THUMBNAIL).image.name
-            )
+            response.data["items"][0]["url"].endswith(small.image.name)
         )
 
     def test_get_forbids_medium_thumbnail_for_basic_tier(self) -> None:
@@ -302,9 +302,14 @@ class ImageViewTests(StubMediaTestCase):
         upload = stub_image_upload("b.png")
         self._put(user_id=premium.pk, filename="b.png", image=upload)
         for size in (ImageSize.MEDIUM_THUMBNAIL, ImageSize.ORIGINAL):
+            row = Image.objects.get(owner_id=premium.pk, size=size)
             response = self._get(user_id=premium.pk, image_size=size.value)
             self.assertEqual(response.status_code, status.HTTP_200_OK)
-            self.assertEqual(len(response.data["urls"]), 1)
+            self.assertEqual(len(response.data["items"]), 1)
+            self.assertEqual(response.data["items"][0]["id"], row.id)
+            self.assertTrue(
+                response.data["items"][0]["url"].endswith(row.image.name)
+            )
 
     def test_get_rejects_missing_user_id(self) -> None:
         response = self._get(user_id=None, image_size=ImageSize.SMALL_THUMBNAIL.value)

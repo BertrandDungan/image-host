@@ -86,8 +86,8 @@ export class ImagesApi extends runtime.BaseAPI {
     }
 
     /**
-     * Returns absolute URLs for all images owned by the user at the given size. Medium thumbnails and originals require Premium or Enterprise.
-     * List image URLs by user and size
+     * Returns each image\'s id and absolute URL for an image owned by the user at the given size. Medium thumbnails and originals require Premium or Enterprise.
+     * List image ids and URLs by user and size
      */
     async imagesRetrieveRaw(requestParameters: ImagesRetrieveRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ImageGetUrlsResponse>> {
         const requestOptions = await this.imagesRetrieveRequestOpts(requestParameters);
@@ -97,8 +97,8 @@ export class ImagesApi extends runtime.BaseAPI {
     }
 
     /**
-     * Returns absolute URLs for all images owned by the user at the given size. Medium thumbnails and originals require Premium or Enterprise.
-     * List image URLs by user and size
+     * Returns each image\'s id and absolute URL for an image owned by the user at the given size. Medium thumbnails and originals require Premium or Enterprise.
+     * List image ids and URLs by user and size
      */
     async imagesRetrieve(requestParameters: ImagesRetrieveRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ImageGetUrlsResponse> {
         const response = await this.imagesRetrieveRaw(requestParameters, initOverrides);
