@@ -10,8 +10,8 @@ class AccountTier(models.TextChoices):
 
 
 class ImageSize(models.TextChoices):
-    SMALL_THUMBNAIL = "small"
-    MEDIUM_THUMBNAIL = "medium"
+    SMALL_THUMBNAIL = "200"
+    MEDIUM_THUMBNAIL = "400"
     ORIGINAL = "original"
 
 

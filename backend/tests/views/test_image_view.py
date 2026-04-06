@@ -10,13 +10,14 @@ from rest_framework import status
 from rest_framework.test import APIRequestFactory
 
 from backend.models import MAX_STRING_LENGTH, AccountTier, Image, ImageSize, User
-from backend.views.image_view import (
-    ImageView,
-    _MEDIUM_THUMB_MAX_PX,
-    _SMALL_THUMB_MAX_PX,
-)
+from backend.views.image_view import ImageView
+
 
 from ..stubs import stub_image_upload
+
+
+MEDIUM_PX = int(ImageSize.MEDIUM_THUMBNAIL)
+SMALL_PX = int(ImageSize.SMALL_THUMBNAIL)
 
 
 class ImageViewTests(TestCase):
@@ -77,16 +78,14 @@ class ImageViewTests(TestCase):
         by_size = {row.size: row for row in Image.objects.all()}
 
         small = by_size[ImageSize.SMALL_THUMBNAIL]
-        self.assertLessEqual(small.image.width, _SMALL_THUMB_MAX_PX)
-        self.assertLessEqual(small.image.height, _SMALL_THUMB_MAX_PX)
-        self.assertEqual(max(small.image.width, small.image.height), _SMALL_THUMB_MAX_PX)
+        self.assertLessEqual(small.image.width, SMALL_PX)
+        self.assertLessEqual(small.image.height, SMALL_PX)
+        self.assertEqual(max(small.image.width, small.image.height), SMALL_PX)
 
         medium = by_size[ImageSize.MEDIUM_THUMBNAIL]
-        self.assertLessEqual(medium.image.width, _MEDIUM_THUMB_MAX_PX)
-        self.assertLessEqual(medium.image.height, _MEDIUM_THUMB_MAX_PX)
-        self.assertEqual(
-            max(medium.image.width, medium.image.height), _MEDIUM_THUMB_MAX_PX
-        )
+        self.assertLessEqual(medium.image.width, MEDIUM_PX)
+        self.assertLessEqual(medium.image.height, MEDIUM_PX)
+        self.assertEqual(max(medium.image.width, medium.image.height), MEDIUM_PX)
 
         original = by_size[ImageSize.ORIGINAL]
         self.assertEqual(original.image.width, orig_w)

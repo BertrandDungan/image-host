@@ -19,8 +19,6 @@ from backend.models import MAX_STRING_LENGTH, Image, ImageSize, User
 from backend.serializer import ImagePutErrorSerializer, ImagePutRequestSerializer
 
 _ALLOWED_PIL_FORMATS = frozenset({"PNG", "JPEG"})
-_SMALL_THUMB_MAX_PX = 150
-_MEDIUM_THUMB_MAX_PX = 600
 _UPLOAD_FIELD = "image"
 _USER_ID_FIELD = "user_id"
 _FILENAME_FIELD = "filename"
@@ -162,8 +160,12 @@ class ImageView(APIView):
         self, payload: ImageView._ValidatedPutPayload
     ) -> Response:
         format = payload.image_format.lower()
-        medium_bytes = self._resize_thumbnail(payload.raw, _MEDIUM_THUMB_MAX_PX, format)
-        small_bytes = self._resize_thumbnail(payload.raw, _SMALL_THUMB_MAX_PX, format)
+        medium_bytes = self._resize_thumbnail(
+            payload.raw, int(ImageSize.MEDIUM_THUMBNAIL), format
+        )
+        small_bytes = self._resize_thumbnail(
+            payload.raw, int(ImageSize.SMALL_THUMBNAIL), format
+        )
 
         variants: tuple[tuple[ImageSize, bytes], ...] = (
             (ImageSize.SMALL_THUMBNAIL, small_bytes),
