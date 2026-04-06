@@ -1,9 +1,14 @@
-import { useState } from "react";
+import { useState, type Dispatch, type SetStateAction } from "react";
 import type { User } from "./api-client/models/User";
 import { UserDebugModal } from "./users.tsx";
 
-function Home() {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+function Home({
+  currentUser,
+  setCurrentUser,
+}: {
+  currentUser: User | null;
+  setCurrentUser: Dispatch<SetStateAction<User | null>>;
+}) {
   const [userDebugOpen, setUserDebugOpen] = useState(false);
 
   return (
