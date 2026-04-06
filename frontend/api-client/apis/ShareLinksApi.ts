@@ -16,17 +16,17 @@
 import * as runtime from '../runtime';
 import type {
   Image,
-  ShareLink,
   ShareLinkCreate,
+  ShareLinkCreateResponse,
   ShareLinkError,
 } from '../models/index';
 import {
     ImageFromJSON,
     ImageToJSON,
-    ShareLinkFromJSON,
-    ShareLinkToJSON,
     ShareLinkCreateFromJSON,
     ShareLinkCreateToJSON,
+    ShareLinkCreateResponseFromJSON,
+    ShareLinkCreateResponseToJSON,
     ShareLinkErrorFromJSON,
     ShareLinkErrorToJSON,
 } from '../models/index';
@@ -80,18 +80,18 @@ export class ShareLinksApi extends runtime.BaseAPI {
      * Creates a `Share_Link` for the given image. Expiry is computed from now plus `expiry_seconds`.
      * Create share link
      */
-    async shareLinksCreateRaw(requestParameters: ShareLinksCreateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ShareLink>> {
+    async shareLinksCreateRaw(requestParameters: ShareLinksCreateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ShareLinkCreateResponse>> {
         const requestOptions = await this.shareLinksCreateRequestOpts(requestParameters);
         const response = await this.request(requestOptions, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => ShareLinkFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => ShareLinkCreateResponseFromJSON(jsonValue));
     }
 
     /**
      * Creates a `Share_Link` for the given image. Expiry is computed from now plus `expiry_seconds`.
      * Create share link
      */
-    async shareLinksCreate(requestParameters: ShareLinksCreateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ShareLink> {
+    async shareLinksCreate(requestParameters: ShareLinksCreateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ShareLinkCreateResponse> {
         const response = await this.shareLinksCreateRaw(requestParameters, initOverrides);
         return await response.value();
     }

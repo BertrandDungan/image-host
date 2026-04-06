@@ -107,7 +107,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Share_Link'
+                $ref: '#/components/schemas/ShareLinkCreateResponse'
           description: Share link was created.
         '400':
           content:
@@ -284,15 +284,10 @@ components:
       required:
       - expiry_seconds
       - image
-    ShareLinkError:
+    ShareLinkCreateResponse:
       type: object
-      description: Error body when share link creation validation fails.
-      properties:
-        detail:
-          type: string
-          description: Human-readable error.
-    Share_Link:
-      type: object
+      description: Share link row as returned after create, including the GET URL
+        for this link.
       properties:
         id:
           type: integer
@@ -302,10 +297,23 @@ components:
         expiry:
           type: string
           format: date-time
+        url:
+          type: string
+          readOnly: true
+          description: Absolute URL for GET /api/share-links/{id}/ (retrieve shared
+            image).
       required:
       - expiry
       - id
       - image
+      - url
+    ShareLinkError:
+      type: object
+      description: Error body when share link creation validation fails.
+      properties:
+        detail:
+          type: string
+          description: Human-readable error.
     SizeEnum:
       enum:
       - '200'

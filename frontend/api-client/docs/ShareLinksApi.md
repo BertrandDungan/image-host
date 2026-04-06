@@ -11,7 +11,7 @@ All URIs are relative to *http://localhost*
 
 ## shareLinksCreate
 
-> ShareLink shareLinksCreate(shareLinkCreate)
+> ShareLinkCreateResponse shareLinksCreate(shareLinkCreate)
 
 Create share link
 
@@ -63,7 +63,7 @@ example().catch(console.error);
 
 ### Return type
 
-[**ShareLink**](ShareLink.md)
+[**ShareLinkCreateResponse**](ShareLinkCreateResponse.md)
 
 ### Authorization
 

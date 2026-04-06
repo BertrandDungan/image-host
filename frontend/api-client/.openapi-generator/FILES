@@ -8,8 +8,8 @@ docs/ImageGetUrlsResponse.md
 docs/ImageListItem.md
 docs/ImagePutError.md
 docs/ImagesApi.md
-docs/ShareLink.md
 docs/ShareLinkCreate.md
+docs/ShareLinkCreateResponse.md
 docs/ShareLinkError.md
 docs/ShareLinksApi.md
 docs/SizeEnum.md
@@ -21,8 +21,8 @@ models/Image.ts
 models/ImageGetUrlsResponse.ts
 models/ImageListItem.ts
 models/ImagePutError.ts
-models/ShareLink.ts
 models/ShareLinkCreate.ts
+models/ShareLinkCreateResponse.ts
 models/ShareLinkError.ts
 models/SizeEnum.ts
 models/User.ts
