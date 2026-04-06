@@ -1,31 +1,81 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import type { User } from "../api-client/models/User";
-import { ImagesRetrieveImageSizeEnum } from "../api-client/apis/ImagesApi";
+import { AccountTierEnum } from "../api-client/models/AccountTierEnum";
+import {
+  ImagesRetrieveImageSizeEnum,
+  type ImagesRetrieveImageSizeEnum as ImageSizeEnum,
+} from "../api-client/apis/ImagesApi";
 import { Api } from "../api";
 
+type ThumbnailSize = "small" | "medium";
+
+type UrlsState = {
+  smallThumbnails: string[] | null;
+  mediumThumbnails: string[] | null;
+};
+
+function canUseMediumThumbnails(user: User | null): boolean {
+  if (!user) return false;
+  return (
+    user.accountTier === AccountTierEnum.Premium ||
+    user.accountTier === AccountTierEnum.Enterprise
+  );
+}
+
 function GridView({ currentUser }: { currentUser: User | null }) {
-  const [urls, setUrls] = useState<string[]>([]);
+  const [urls, setUrls] = useState<UrlsState>({
+    smallThumbnails: null,
+    mediumThumbnails: null,
+  });
+  const [thumbnailSize, setThumbnailSize] = useState<ThumbnailSize>("small");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!currentUser) {
-      setUrls([]);
+      setUrls({ smallThumbnails: null, mediumThumbnails: null });
+      setThumbnailSize("small");
       setError(null);
       setLoading(false);
       return;
     }
+    setUrls({ smallThumbnails: null, mediumThumbnails: null });
+    setThumbnailSize("small");
+    setError(null);
+  }, [currentUser?.id]);
+
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const thumbnailKey: keyof UrlsState =
+      thumbnailSize === "small" ? "smallThumbnails" : "mediumThumbnails";
+    const cached = urls[thumbnailKey];
+    if (cached !== null) {
+      setLoading(false);
+      return;
+    }
+
+    const imageSize: ImageSizeEnum =
+      thumbnailSize === "small"
+        ? ImagesRetrieveImageSizeEnum._200
+        : ImagesRetrieveImageSizeEnum._400;
+
     let cancelled = false;
     setLoading(true);
     setError(null);
     Api.images
       .imagesRetrieve({
-        imageSize: ImagesRetrieveImageSizeEnum._200,
+        imageSize,
         userId: currentUser.id,
       })
       .then((res) => {
-        if (!cancelled) setUrls(res.urls);
+        if (!cancelled) {
+          setUrls((prev) => ({
+            ...prev,
+            [thumbnailKey]: res.urls,
+          }));
+        }
       })
       .catch(() => {
         if (!cancelled) setError("Could not load images");
@@ -36,7 +86,17 @@ function GridView({ currentUser }: { currentUser: User | null }) {
     return () => {
       cancelled = true;
     };
-  }, [currentUser?.id]);
+  }, [
+    currentUser?.id,
+    thumbnailSize,
+    urls.smallThumbnails,
+    urls.mediumThumbnails,
+  ]);
+
+  const displayUrls =
+    thumbnailSize === "small" ? urls.smallThumbnails : urls.mediumThumbnails;
+
+  const premiumToggle = canUseMediumThumbnails(currentUser);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-slate-950 px-6 py-16">
@@ -45,12 +105,33 @@ function GridView({ currentUser }: { currentUser: User | null }) {
           <h1 className="text-2xl font-semibold tracking-tight text-slate-100 sm:text-3xl">
             Your images
           </h1>
-          <Link
-            to="/"
-            className="shrink-0 rounded-lg border border-slate-600 bg-transparent px-5 py-2.5 text-center text-sm font-medium text-slate-200 transition hover:border-slate-500 hover:bg-slate-800/60"
-          >
-            Back
-          </Link>
+          <div className="flex flex-wrap items-center gap-3">
+            {currentUser && (
+              <button
+                type="button"
+                disabled={!premiumToggle}
+                onClick={() =>
+                  setThumbnailSize((s) => (s === "small" ? "medium" : "small"))
+                }
+                className="shrink-0 rounded-lg border border-slate-600 bg-transparent px-4 py-2 text-center text-xs font-medium text-slate-200 transition hover:border-slate-500 hover:bg-slate-800/60 disabled:cursor-not-allowed disabled:opacity-40"
+                aria-label={
+                  thumbnailSize === "small"
+                    ? "Switch to medium thumbnails"
+                    : "Switch to small thumbnails"
+                }
+              >
+                {thumbnailSize === "small"
+                  ? "Switch to medium thumbnails (400px)"
+                  : "Switch to small thumbnails (200px)"}
+              </button>
+            )}
+            <Link
+              to="/"
+              className="shrink-0 rounded-lg border border-slate-600 bg-transparent px-5 py-2.5 text-center text-sm font-medium text-slate-200 transition hover:border-slate-500 hover:bg-slate-800/60"
+            >
+              Back
+            </Link>
+          </div>
         </div>
 
         {!currentUser && (
@@ -65,23 +146,40 @@ function GridView({ currentUser }: { currentUser: User | null }) {
         {currentUser && error && !loading && (
           <p className="mt-8 text-sm text-red-400">{error}</p>
         )}
-        {currentUser && !loading && !error && urls.length === 0 && (
-          <p className="mt-8 text-center text-sm text-slate-500">
-            No images yet for this user.
-          </p>
-        )}
-        {currentUser && !loading && !error && urls.length > 0 && (
-          <div className="mt-8 grid grid-cols-1 gap-4">
-            {urls.map((url) => (
-              <img
-                key={url}
-                src={url}
-                loading="lazy"
-                className="w-full max-w-full rounded-lg border border-slate-800/80 object-contain"
-              />
-            ))}
-          </div>
-        )}
+        {currentUser &&
+          !loading &&
+          !error &&
+          displayUrls !== null &&
+          displayUrls.length === 0 && (
+            <p className="mt-8 text-center text-sm text-slate-500">
+              No images yet for this user.
+            </p>
+          )}
+        {currentUser &&
+          !loading &&
+          !error &&
+          displayUrls !== null &&
+          displayUrls.length > 0 && (
+            <div
+              className="mt-8 grid gap-4"
+              style={{
+                gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, ${thumbnailSize === "small" ? 200 : 400}px), 1fr))`,
+              }}
+            >
+              {displayUrls.map((url) => (
+                <img
+                  key={url}
+                  src={url}
+                  loading="lazy"
+                  className="h-auto w-auto max-w-full justify-self-center rounded-lg border border-slate-800/80 object-contain"
+                  style={{
+                    maxWidth: thumbnailSize === "small" ? 200 : 400,
+                    maxHeight: thumbnailSize === "small" ? 200 : 400,
+                  }}
+                />
+              ))}
+            </div>
+          )}
       </div>
     </div>
   );
