@@ -49,3 +49,12 @@ class ImagePutErrorSerializer(serializers.Serializer[Any]):
         required=False,
         help_text="Human-readable error.",
     )
+
+
+class ImageGetUrlsResponseSerializer(serializers.Serializer[Any]):
+    """JSON body listing absolute URLs for the requested size."""
+
+    urls = serializers.ListField(
+        child=serializers.URLField(),
+        help_text="Absolute URLs of stored images for the user and size.",
+    )

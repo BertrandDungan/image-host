@@ -4,6 +4,53 @@ info:
   version: 0.0.0
 paths:
   /api/images/:
+    get:
+      operationId: images_retrieve
+      description: Returns absolute URLs for all images owned by the user at the given
+        size. Medium thumbnails and originals require Premium or Enterprise.
+      summary: List image URLs by user and size
+      parameters:
+      - in: query
+        name: image_size
+        schema:
+          type: string
+          enum:
+          - '200'
+          - '400'
+          - original
+        description: Variant size key (matches `ImageSize`).
+        required: true
+      - in: query
+        name: user_id
+        schema:
+          type: integer
+        description: Owner user ID.
+        required: true
+      tags:
+      - images
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImageGetUrlsResponse'
+          description: Matching image URLs (may be empty).
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImagePutError'
+          description: Missing or invalid query parameters, or unknown user.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImagePutError'
+          description: Account tier does not allow this image size.
     put:
       operationId: images_update
       description: Multipart upload that creates three `Image` objects (small thumbnail,
@@ -83,6 +130,18 @@ components:
         * `Basic` - Basic
         * `Premium` - Premium
         * `Enterprise` - Enterprise
+    ImageGetUrlsResponse:
+      type: object
+      description: JSON body listing absolute URLs for the requested size.
+      properties:
+        urls:
+          type: array
+          items:
+            type: string
+            format: uri
+          description: Absolute URLs of stored images for the user and size.
+      required:
+      - urls
     ImagePutError:
       type: object
       description: Error body when validation fails before persistence.

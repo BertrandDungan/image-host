@@ -43,6 +43,20 @@ class ImageViewTests(TestCase):
         request = self.factory.put("/", data, format="multipart")
         return self.view(request)
 
+    def _get(
+        self,
+        *,
+        user_id: str | int | None = None,
+        image_size: str | None = None,
+    ) -> Any:
+        q: list[tuple[str, str]] = []
+        if user_id is not None:
+            q.append(("user_id", str(user_id)))
+        if image_size is not None:
+            q.append(("image_size", image_size))
+        request = self.factory.get("/", q)
+        return self.view(request)
+
     def test_put_saves_png_and_returns_204(self) -> None:
         upload = stub_image_upload("my_photo.png")
         response = self._put(
@@ -246,3 +260,68 @@ class ImageViewTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data, {"title": ["Invalid title."]})
         self.assertEqual(Image.objects.count(), 0)
+
+    def test_get_returns_small_thumbnail_urls_for_basic_tier(self) -> None:
+        upload = stub_image_upload("a.png")
+        self._put(user_id=self.user.pk, filename="a.png", image=upload)
+        response = self._get(
+            user_id=self.user.pk,
+            image_size=ImageSize.SMALL_THUMBNAIL.value,
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data["urls"]), 1)
+        self.assertTrue(
+            response.data["urls"][0].endswith(
+                Image.objects.get(size=ImageSize.SMALL_THUMBNAIL).image.name
+            )
+        )
+
+    def test_get_forbids_medium_thumbnail_for_basic_tier(self) -> None:
+        upload = stub_image_upload("a.png")
+        self._put(user_id=self.user.pk, filename="a.png", image=upload)
+        response = self._get(
+            user_id=self.user.pk,
+            image_size=ImageSize.MEDIUM_THUMBNAIL.value,
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertIn("detail", response.data)
+
+    def test_get_forbids_original_for_basic_tier(self) -> None:
+        upload = stub_image_upload("a.png")
+        self._put(user_id=self.user.pk, filename="a.png", image=upload)
+        response = self._get(
+            user_id=self.user.pk,
+            image_size=ImageSize.ORIGINAL.value,
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_get_returns_medium_and_original_urls_for_premium_tier(self) -> None:
+        premium = User.objects.create(
+            name="vip",
+            account_tier=AccountTier.PREMIUM,
+        )
+        upload = stub_image_upload("b.png")
+        self._put(user_id=premium.pk, filename="b.png", image=upload)
+        for size in (ImageSize.MEDIUM_THUMBNAIL, ImageSize.ORIGINAL):
+            response = self._get(user_id=premium.pk, image_size=size.value)
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(len(response.data["urls"]), 1)
+
+    def test_get_rejects_missing_user_id(self) -> None:
+        response = self._get(user_id=None, image_size=ImageSize.SMALL_THUMBNAIL.value)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_get_rejects_missing_image_size(self) -> None:
+        response = self._get(user_id=self.user.pk, image_size=None)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_get_rejects_invalid_image_size(self) -> None:
+        response = self._get(user_id=self.user.pk, image_size="huge")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_get_rejects_unknown_user(self) -> None:
+        response = self._get(
+            user_id=9_999_999,
+            image_size=ImageSize.SMALL_THUMBNAIL.value,
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

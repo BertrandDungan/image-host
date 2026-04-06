@@ -7,7 +7,8 @@ from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db import transaction
 from PIL import Image as PILImage, UnidentifiedImageError
-from drf_spectacular.utils import OpenApiResponse, extend_schema
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
 from rest_framework.parsers import MultiPartParser
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -15,17 +16,128 @@ from rest_framework.views import APIView
 from rest_framework import status
 from uuid import uuid4
 
-from backend.models import MAX_STRING_LENGTH, Image, ImageSize, User
-from backend.serializer import ImagePutErrorSerializer, ImagePutRequestSerializer
+from backend.models import (
+    MAX_STRING_LENGTH,
+    AccountTier,
+    Image,
+    ImageSize,
+    User,
+)
+from backend.serializer import (
+    ImageGetUrlsResponseSerializer,
+    ImagePutErrorSerializer,
+    ImagePutRequestSerializer,
+)
 
 _ALLOWED_PIL_FORMATS = frozenset({"PNG", "JPEG"})
 _UPLOAD_FIELD = "image"
 _USER_ID_FIELD = "user_id"
 _FILENAME_FIELD = "filename"
+_IMAGE_SIZE_QUERY = "image_size"
+_PREMIUM_SIZE_VALUES = frozenset(
+    {ImageSize.MEDIUM_THUMBNAIL.value, ImageSize.ORIGINAL.value}
+)
 
 
 class ImageView(APIView):
     parser_classes = [MultiPartParser]
+
+    @extend_schema(
+        summary="List image URLs by user and size",
+        description=(
+            "Returns absolute URLs for all images owned by the user at the given "
+            "size. Medium thumbnails and originals require Premium or Enterprise."
+        ),
+        tags=["images"],
+        parameters=[
+            OpenApiParameter(
+                name=_USER_ID_FIELD,
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.QUERY,
+                required=True,
+                description="Owner user ID.",
+            ),
+            OpenApiParameter(
+                name=_IMAGE_SIZE_QUERY,
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                required=True,
+                enum=list(ImageSize.values),
+                description="Variant size key (matches `ImageSize`).",
+            ),
+        ],
+        responses={
+            status.HTTP_200_OK: OpenApiResponse(
+                response=ImageGetUrlsResponseSerializer,
+                description="Matching image URLs (may be empty).",
+            ),
+            status.HTTP_400_BAD_REQUEST: OpenApiResponse(
+                response=ImagePutErrorSerializer,
+                description="Missing or invalid query parameters, or unknown user.",
+            ),
+            status.HTTP_403_FORBIDDEN: OpenApiResponse(
+                response=ImagePutErrorSerializer,
+                description="Account tier does not allow this image size.",
+            ),
+        },
+    )
+    def get(self, request: Request) -> Response:
+        user_id_raw = request.query_params.get(_USER_ID_FIELD)
+        if user_id_raw is None or user_id_raw == "":
+            return Response(
+                {"detail": f"Missing '{_USER_ID_FIELD}' query parameter."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            user_id = int(user_id_raw)
+        except (TypeError, ValueError):
+            return Response(
+                {"detail": f"Invalid '{_USER_ID_FIELD}'."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        size_raw = request.query_params.get(_IMAGE_SIZE_QUERY)
+        if size_raw is None or size_raw == "":
+            return Response(
+                {"detail": f"Missing '{_IMAGE_SIZE_QUERY}' query parameter."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if size_raw not in ImageSize.values:
+            return Response(
+                {"detail": f"Invalid '{_IMAGE_SIZE_QUERY}'."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return Response(
+                {"detail": f"No user exists with the given id: {user_id}."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if size_raw in _PREMIUM_SIZE_VALUES:
+            if user.account_tier not in (
+                AccountTier.PREMIUM,
+                AccountTier.ENTERPRISE,
+            ):
+                return Response(
+                    {
+                        "detail": (
+                            "Medium thumbnails and original images require a "
+                            "Premium or Enterprise account."
+                        ),
+                    },
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+
+        urls = [
+            request.build_absolute_uri(row.image.url)
+            for row in Image.objects.filter(owner_id=user_id, size=size_raw).order_by(
+                "id"
+            )
+        ]
+        return Response({"urls": urls})
 
     @extend_schema(
         summary="Upload image",
