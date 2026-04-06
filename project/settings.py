@@ -31,6 +31,7 @@ DEBUG = True
 
 ALLOWED_HOSTS: list[None] = []
 
+CORS_ORIGIN_ALLOW_ALL = DEBUG
 
 # Application definition
 
@@ -43,12 +44,15 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django_vite",
     "django_browser_reload",
+    "corsheaders",
     "rest_framework",
     "drf_spectacular",
     "backend",
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
