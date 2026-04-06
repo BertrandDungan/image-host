@@ -1,4 +1,5 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
+import { Link } from "react-router";
 import type { User } from "./api-client/models/User";
 import { UserDebugModal } from "./users.tsx";
 
@@ -37,13 +38,22 @@ function Home({
           Cheap basic image hosting
         </p>
         <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:justify-center">
-          <button
-            type="button"
-            disabled={!currentUser}
-            className="rounded-lg border border-slate-600 bg-transparent px-5 py-2.5 text-sm font-medium text-slate-200 transition hover:border-slate-500 hover:bg-slate-800/60 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-slate-600 disabled:hover:bg-transparent"
-          >
-            View images
-          </button>
+          {currentUser ? (
+            <Link
+              to="/images"
+              className="rounded-lg border border-slate-600 bg-transparent px-5 py-2.5 text-center text-sm font-medium text-slate-200 transition hover:border-slate-500 hover:bg-slate-800/60"
+            >
+              View images
+            </Link>
+          ) : (
+            <button
+              type="button"
+              disabled
+              className="rounded-lg border border-slate-600 bg-transparent px-5 py-2.5 text-sm font-medium text-slate-200 transition hover:border-slate-500 hover:bg-slate-800/60 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-slate-600 disabled:hover:bg-transparent"
+            >
+              View images
+            </button>
+          )}
           <button
             type="button"
             disabled={!currentUser}

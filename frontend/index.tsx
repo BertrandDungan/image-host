@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes } from "react-router";
 import type { User } from "./api-client/models/User";
 import Home from "./home.tsx";
+import Images from "./images.tsx";
 
 function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -13,6 +14,10 @@ function App() {
         element={
           <Home currentUser={currentUser} setCurrentUser={setCurrentUser} />
         }
+      />
+      <Route
+        path="/images"
+        element={<Images currentUser={currentUser} />}
       />
       <Route
         path="*"
