@@ -16,11 +16,14 @@ type UrlsState = {
 };
 
 function isHighTierAccount(user: User | null): boolean {
-  if (!user) return false;
   return (
-    user.accountTier === AccountTierEnum.Premium ||
-    user.accountTier === AccountTierEnum.Enterprise
+    user?.accountTier === AccountTierEnum.Premium ||
+    user?.accountTier === AccountTierEnum.Enterprise
   );
+}
+
+function isEnterpriseAccount(user: User | null): boolean {
+  return user?.accountTier === AccountTierEnum.Enterprise;
 }
 
 function GridView({ currentUser }: { currentUser: User | null }) {
@@ -169,6 +172,7 @@ function GridView({ currentUser }: { currentUser: User | null }) {
     thumbnailSize === "small" ? urls.smallThumbnails : urls.mediumThumbnails;
 
   const premiumToggle = isHighTierAccount(currentUser);
+  const shareEnabled = isEnterpriseAccount(currentUser);
 
   function dismissViewer() {
     closingRef.current = true;
@@ -271,45 +275,56 @@ function GridView({ currentUser }: { currentUser: User | null }) {
               {displayUrls.map((thumbUrl, index) => {
                 const originalUrl = urls.originals?.[index];
 
-                if (originalUrl !== undefined) {
-                  return (
-                    <button
-                      key={thumbUrl}
-                      type="button"
-                      onClick={() => setViewerUrl(originalUrl)}
-                      className="h-auto w-auto max-w-full cursor-pointer justify-self-center rounded-lg border border-slate-800/80 object-contain p-0 transition hover:border-slate-600"
-                      style={{
-                        maxWidth: thumbMax,
-                        maxHeight: thumbMax,
-                      }}
-                      aria-label="View full-size image"
-                    >
+                return (
+                  <div
+                    key={thumbUrl}
+                    className="flex flex-col items-center gap-2 justify-self-center"
+                  >
+                    {originalUrl !== undefined ? (
+                      <button
+                        type="button"
+                        onClick={() => setViewerUrl(originalUrl)}
+                        className="h-auto w-auto max-w-full cursor-pointer rounded-lg border border-slate-800/80 object-contain p-0 transition hover:border-slate-600"
+                        style={{
+                          maxWidth: thumbMax,
+                          maxHeight: thumbMax,
+                        }}
+                        aria-label="View full-size image"
+                      >
+                        <img
+                          src={thumbUrl}
+                          alt=""
+                          loading="lazy"
+                          className="h-auto max-h-full w-auto max-w-full rounded-lg object-contain"
+                          style={{
+                            maxWidth: thumbMax,
+                            maxHeight: thumbMax,
+                          }}
+                        />
+                      </button>
+                    ) : (
                       <img
                         src={thumbUrl}
                         alt=""
                         loading="lazy"
-                        className="h-auto max-h-full w-auto max-w-full rounded-lg object-contain"
+                        className="h-auto w-auto max-w-full rounded-lg border border-slate-800/80 object-contain"
                         style={{
                           maxWidth: thumbMax,
                           maxHeight: thumbMax,
                         }}
                       />
+                    )}
+                    <button
+                      type="button"
+                      disabled={!shareEnabled}
+                      className="rounded-lg border border-slate-600 bg-transparent px-3 py-1 text-center text-xs font-medium text-slate-200 transition hover:border-slate-500 hover:bg-slate-800/60 disabled:cursor-not-allowed disabled:opacity-40"
+                      aria-label={
+                        shareEnabled ? "Share image" : "Share (Enterprise only)"
+                      }
+                    >
+                      Share
                     </button>
-                  );
-                }
-
-                return (
-                  <img
-                    key={thumbUrl}
-                    src={thumbUrl}
-                    alt=""
-                    loading="lazy"
-                    className="h-auto w-auto max-w-full justify-self-center rounded-lg border border-slate-800/80 object-contain"
-                    style={{
-                      maxWidth: thumbMax,
-                      maxHeight: thumbMax,
-                    }}
-                  />
+                  </div>
                 );
               })}
             </div>
