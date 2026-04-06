@@ -1,10 +1,16 @@
+apis/ImagesApi.ts
 apis/UsersApi.ts
 apis/index.ts
 docs/AccountTierEnum.md
+docs/ImageGetUrlsResponse.md
+docs/ImagePutError.md
+docs/ImagesApi.md
 docs/User.md
 docs/UsersApi.md
 index.ts
 models/AccountTierEnum.ts
+models/ImageGetUrlsResponse.ts
+models/ImagePutError.ts
 models/User.ts
 models/index.ts
 runtime.ts
