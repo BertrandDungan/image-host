@@ -1,6 +1,6 @@
 # Image Hosting App
 
-This codebase was adapted from the steps in [Modern JavaScript for Django Developers](https://www.saaspegasus.com/guides/modern-javascript-for-django-developers/).
+This base for this codebase was adapted from the steps in [Modern JavaScript for Django Developers](https://www.saaspegasus.com/guides/modern-javascript-for-django-developers/).
 
 This mini app allows the uploading and viewing of images and was created as a basic coding exercise.
 
