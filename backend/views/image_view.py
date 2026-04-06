@@ -2,27 +2,22 @@ from __future__ import annotations
 
 from io import BytesIO
 from typing import NamedTuple
+from uuid import uuid4
 
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db import transaction
-from PIL import Image as PILImage, UnidentifiedImageError
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
+from PIL import Image as PILImage
+from PIL import UnidentifiedImageError
+from rest_framework import status
 from rest_framework.parsers import MultiPartParser
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import status
-from uuid import uuid4
 
-from backend.models import (
-    MAX_STRING_LENGTH,
-    AccountTier,
-    Image,
-    ImageSize,
-    User,
-)
+from backend.models import MAX_STRING_LENGTH, AccountTier, Image, ImageSize, User
 from backend.serializer import (
     ImageGetUrlsResponseSerializer,
     ImagePutErrorSerializer,

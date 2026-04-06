@@ -2,7 +2,6 @@ from django.core.management.base import BaseCommand
 
 from backend.models import AccountTier, User
 
-
 SEED_USERS: list[tuple[str, AccountTier]] = [
     ("Bobby", AccountTier.BASIC),
     ("Penny", AccountTier.PREMIUM),

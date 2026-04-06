@@ -7,7 +7,7 @@ from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from backend.models import MAX_STRING_LENGTH, User, Image, Share_Link
+from backend.models import MAX_STRING_LENGTH, Image, Share_Link, User
 
 
 class UserSerializer(serializers.ModelSerializer[User]):
