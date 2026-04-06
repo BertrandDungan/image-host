@@ -12,6 +12,9 @@ function readCookie(name: string): string | undefined {
   return match ? decodeURIComponent(match[1]) : undefined;
 }
 
+/**
+ * Adds the Django CSRF token to the request headers.
+ */
 const csrfMiddleware: Middleware = {
   async pre({ url, init }) {
     const token = readCookie("csrftoken");
@@ -27,6 +30,10 @@ const config = new Configuration({
   middleware: [csrfMiddleware],
 });
 
+/**
+ * This is a single entry point for all API clients.
+ * It is used to avoid dupliation of configuration or middleware.
+ */
 export const Api = {
   users: new UsersApi(config),
   images: new ImagesApi(config),
