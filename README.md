@@ -36,26 +36,43 @@ Tests are run via `npm run test`.
 
 ## Using Image Host
 
-![main](.assets/main.png)
+### User setup
+
+When you first enter the website you'll be created with the following menu.
+![Main Screen for Image Host](.assets/main.png)
+
+While auth and user registration were out of scope, I still decided to tie features of the app to invidiual users to simulate how it would work with many users of different types.
+
+To start using it, you will need to click on the `Select a user` button. This will open the user debug menu shown below. If you cannot see any users, then check that you followed the setup steps above including the seeding of the database.
+
+![Debug menu](.assets/debug.png)
+
+Each user has a separate ID and account tier for ease of testing. When you select `Set user` you will be redirected back to the main page. But the state will be updated and you will now be identified as that particular user. If you want to change user's later, then simply return the to the main screen and choose `Select another user`.
+
+![Eddy main screen](.assets/eddy.png)
+
+### Uploading images
+
+After choosing a user, you can uploade images by clicking on the `Upload images` button.
+![Upload screen](.assets/upload.png)
+
+After clicking that you are given the option to choose a file to upload. Assuming it was a valid image, you will get confirmation of the upload. You can continue uploading images here until you are satisfied.
+
+You will be able to see the images as they have been uploaded and cropped in `dist/images` in the main repo.
+
+### Viewing uploaded images
+
+After choosing a user, you can view uploaded images by clicking on the `View Images`. If you have not already uploaded any images, then this will show a blank screen. However, once you upload some images as a user their thumbnails will appear here.
+
+![Image thumbnails](.assets/thumbnails.png)
+
+If you have chosen a basic account, then some of the buttons will be disabled and you will only be able to view 200px thumbnails. However if you chose Premium or Enterprise then you will see a button which allows you to request and switch to 400px thumbnails.
+
+Additionally, Premium or Enterprise users can click on a thumbnail and will be shown a full resolution copy of the image. This can be dismissed by clicking again.
+
+Finally, Enterprise users can create time limited share links. If you click on `Share` then it will give you a form to create a link which will expire in a given amount of seconds. This link redirects to the original image, unless it has expired in which case it gives a 404.
 
 ## Technical details
-
-### Repository Structure
-
-```text
-image-host/ - Root project directory
-|-- backend/ - Django backend app code
-|   |-- management/ - Django management command modules
-|   |-- migrations/ - Database migration history
-|   |-- tests/ - Backend unit and integration tests
-|   `-- views/ - HTTP view handlers and API endpoints
-|-- frontend/ - React frontend application
-|   |-- api-client/ - Generated TypeScript API client
-|   |-- images/ - Folder to organise code related to the display of images
-|   `-- tests/ - Frontend test suites and helpers
-`-- project/ - Django project configuration
-`-- dist/ - Static file build area shared between the frontend and the backend. Also used to store images.
-```
 
 uv run manage.py spectacular --file schema.yml
 npm run generate-api
