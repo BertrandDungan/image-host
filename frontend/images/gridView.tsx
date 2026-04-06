@@ -7,12 +7,13 @@ import {
   type ImagesRetrieveImageSizeEnum as ImageSizeEnum,
 } from "../api-client/apis/ImagesApi";
 import { Api } from "../api";
+import type { ImageListItem } from "../api-client/models/ImageListItem";
 import FullImage from "./fullImage";
 
-type UrlsState = {
-  smallThumbnails: string[] | null;
-  mediumThumbnails: string[] | null;
-  originals: string[] | null;
+type imageState = {
+  smallThumbnails: ImageListItem[] | null;
+  mediumThumbnails: ImageListItem[] | null;
+  originals: ImageListItem[] | null;
 };
 
 function isHighTierAccount(user: User | null): boolean {
@@ -27,7 +28,7 @@ function isEnterpriseAccount(user: User | null): boolean {
 }
 
 function GridView({ currentUser }: { currentUser: User | null }) {
-  const [urls, setUrls] = useState<UrlsState>({
+  const [images, setImages] = useState<imageState>({
     smallThumbnails: null,
     mediumThumbnails: null,
     originals: null,
@@ -43,7 +44,7 @@ function GridView({ currentUser }: { currentUser: User | null }) {
 
   useEffect(() => {
     if (!currentUser) {
-      setUrls({
+      setImages({
         smallThumbnails: null,
         mediumThumbnails: null,
         originals: null,
@@ -53,7 +54,7 @@ function GridView({ currentUser }: { currentUser: User | null }) {
       setLoading(false);
       return;
     }
-    setUrls({
+    setImages({
       smallThumbnails: null,
       mediumThumbnails: null,
       originals: null,
@@ -68,7 +69,7 @@ function GridView({ currentUser }: { currentUser: User | null }) {
 
     const thumbnailKey: "smallThumbnails" | "mediumThumbnails" =
       thumbnailSize === "small" ? "smallThumbnails" : "mediumThumbnails";
-    const cached = urls[thumbnailKey];
+    const cached = images[thumbnailKey];
     if (cached !== null) {
       setLoading(false);
       return;
@@ -89,9 +90,9 @@ function GridView({ currentUser }: { currentUser: User | null }) {
       })
       .then((res) => {
         if (!cancelled) {
-          setUrls((prev) => ({
+          setImages((prev) => ({
             ...prev,
-            [thumbnailKey]: res.items.map((i) => i.url),
+            [thumbnailKey]: res.items,
           }));
         }
       })
@@ -107,16 +108,17 @@ function GridView({ currentUser }: { currentUser: User | null }) {
   }, [
     currentUser?.id,
     thumbnailSize,
-    urls.smallThumbnails,
-    urls.mediumThumbnails,
+    images.smallThumbnails,
+    images.mediumThumbnails,
   ]);
 
   // Load original image URLs for high-tier accounts
   useEffect(() => {
     if (!currentUser) return;
     if (!isHighTierAccount(currentUser)) return;
-    if (urls.originals !== null) return;
-    if (urls.smallThumbnails === null && urls.mediumThumbnails === null) return;
+    if (images.originals !== null) return;
+    if (images.smallThumbnails === null && images.mediumThumbnails === null)
+      return;
 
     let cancelled = false;
     Api.images
@@ -126,9 +128,9 @@ function GridView({ currentUser }: { currentUser: User | null }) {
       })
       .then((res) => {
         if (!cancelled) {
-          setUrls((prev) => ({
+          setImages((prev) => ({
             ...prev,
-            originals: res.items.map((i) => i.url),
+            originals: res.items,
           }));
         }
       })
@@ -142,9 +144,9 @@ function GridView({ currentUser }: { currentUser: User | null }) {
     };
   }, [
     currentUser?.id,
-    urls.smallThumbnails,
-    urls.mediumThumbnails,
-    urls.originals,
+    images.smallThumbnails,
+    images.mediumThumbnails,
+    images.originals,
   ]);
 
   // Handle full image overlay animations
@@ -172,7 +174,9 @@ function GridView({ currentUser }: { currentUser: User | null }) {
   }, [viewerUrl]);
 
   const displayUrls =
-    thumbnailSize === "small" ? urls.smallThumbnails : urls.mediumThumbnails;
+    thumbnailSize === "small"
+      ? images.smallThumbnails
+      : images.mediumThumbnails;
 
   const premiumToggle = isHighTierAccount(currentUser);
   const shareEnabled = isEnterpriseAccount(currentUser);
@@ -275,12 +279,12 @@ function GridView({ currentUser }: { currentUser: User | null }) {
                 gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, ${thumbnailSize === "small" ? 200 : 400}px), 1fr))`,
               }}
             >
-              {displayUrls.map((thumbUrl, index) => {
-                const originalUrl = urls.originals?.[index];
+              {displayUrls.map((item, index) => {
+                const originalUrl = images.originals?.[index]?.url;
 
                 return (
                   <div
-                    key={thumbUrl}
+                    key={item.id}
                     className="flex flex-col items-center gap-2 justify-self-center"
                   >
                     {originalUrl !== undefined ? (
@@ -295,7 +299,7 @@ function GridView({ currentUser }: { currentUser: User | null }) {
                         aria-label="View full-size image"
                       >
                         <img
-                          src={thumbUrl}
+                          src={item.url}
                           alt=""
                           loading="lazy"
                           className="h-auto max-h-full w-auto max-w-full rounded-lg object-contain"
@@ -307,7 +311,7 @@ function GridView({ currentUser }: { currentUser: User | null }) {
                       </button>
                     ) : (
                       <img
-                        src={thumbUrl}
+                        src={item.url}
                         alt=""
                         loading="lazy"
                         className="h-auto w-auto max-w-full rounded-lg border border-slate-800/80 object-contain"
