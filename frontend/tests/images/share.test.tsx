@@ -19,7 +19,7 @@ describe("SharePopover", () => {
 
   it("renders null when closed", () => {
     const { container } = render(
-      <SharePopover imageId={9} open={false} onClose={vi.fn()} />,
+      <SharePopover originalImageId={9} open={false} onClose={vi.fn()} />,
     );
     expect(container.firstChild).toBeNull();
   });
@@ -32,7 +32,7 @@ describe("SharePopover", () => {
       image: 9,
     });
 
-    render(<SharePopover imageId={9} open onClose={vi.fn()} />);
+    render(<SharePopover originalImageId={9} open onClose={vi.fn()} />);
 
     fireEvent.click(screen.getByRole("button", { name: "Create link" }));
     expect(
@@ -42,7 +42,7 @@ describe("SharePopover", () => {
 
   it("closes on escape", () => {
     const onClose = vi.fn();
-    render(<SharePopover imageId={9} open onClose={onClose} />);
+    render(<SharePopover originalImageId={9} open onClose={onClose} />);
 
     fireEvent.keyDown(window, { key: "Escape" });
     expect(onClose).toHaveBeenCalled();
@@ -57,7 +57,7 @@ describe("SharePopover", () => {
       ),
     );
 
-    render(<SharePopover imageId={9} open onClose={vi.fn()} />);
+    render(<SharePopover originalImageId={9} open onClose={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: "Create link" }));
 
     expect(await screen.findByText("Invalid expiry")).toBeInTheDocument();
@@ -68,7 +68,7 @@ describe("SharePopover", () => {
       new FetchError(new Error("offline")),
     );
 
-    render(<SharePopover imageId={9} open onClose={vi.fn()} />);
+    render(<SharePopover originalImageId={9} open onClose={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: "Create link" }));
 
     expect(

@@ -16,6 +16,7 @@ describe("ImageGridItem", () => {
         item={item}
         thumbMax={200}
         originalUrl={undefined}
+        originalImageId={undefined}
         shareEnabled={false}
         onViewFull={vi.fn()}
       />,
@@ -31,6 +32,7 @@ describe("ImageGridItem", () => {
         item={item}
         thumbMax={200}
         originalUrl={"https://cdn/7-original.png"}
+        originalImageId={7}
         shareEnabled={true}
         onViewFull={onViewFull}
       />,
@@ -48,6 +50,7 @@ describe("ImageGridItem", () => {
         item={item}
         thumbMax={200}
         originalUrl={undefined}
+        originalImageId={undefined}
         shareEnabled={true}
         onViewFull={vi.fn()}
       />,
@@ -63,6 +66,7 @@ describe("ImageGridItem", () => {
         item={item}
         thumbMax={200}
         originalUrl={undefined}
+        originalImageId={undefined}
         shareEnabled={false}
         onViewFull={vi.fn()}
       />,

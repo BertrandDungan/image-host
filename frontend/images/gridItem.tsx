@@ -6,6 +6,7 @@ type ImageGridItemProps = {
   item: ImageListItem;
   thumbMax: number;
   originalUrl: string | undefined;
+  originalImageId: number | undefined;
   shareEnabled: boolean;
   onViewFull: (url: string) => void;
 };
@@ -14,6 +15,7 @@ function ImageGridItem({
   item,
   thumbMax,
   originalUrl,
+  originalImageId,
   shareEnabled,
   onViewFull,
 }: ImageGridItemProps) {
@@ -69,7 +71,7 @@ function ImageGridItem({
           Share
         </button>
         <SharePopover
-          imageId={item.id}
+          originalImageId={originalImageId ?? item.id}
           open={shareOpen}
           onClose={() => setShareOpen(false)}
         />

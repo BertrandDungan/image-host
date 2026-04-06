@@ -282,6 +282,7 @@ function GridView({ currentUser }: { currentUser: User | null }) {
             >
               {displayUrls.map((item, index) => {
                 const originalUrl = images.originals?.[index]?.url;
+                const originalImageId = images.originals?.[index]?.id;
 
                 return (
                   <ImageGridItem
@@ -289,6 +290,7 @@ function GridView({ currentUser }: { currentUser: User | null }) {
                     item={item}
                     thumbMax={thumbMax}
                     originalUrl={originalUrl}
+                    originalImageId={originalImageId}
                     shareEnabled={shareEnabled}
                     onViewFull={setViewerUrl}
                   />

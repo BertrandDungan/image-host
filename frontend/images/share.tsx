@@ -31,12 +31,16 @@ async function messageFromResponseError(err: ResponseError): Promise<string> {
 }
 
 type SharePopoverProps = {
-  imageId: number;
+  originalImageId: number;
   open: boolean;
   onClose: () => void;
 };
 
-export function SharePopover({ imageId, open, onClose }: SharePopoverProps) {
+export function SharePopover({
+  originalImageId,
+  open,
+  onClose,
+}: SharePopoverProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const [expirySeconds, setExpirySeconds] = useState(String(DEFAULT_SECONDS));
   const [loading, setLoading] = useState(false);
@@ -48,7 +52,7 @@ export function SharePopover({ imageId, open, onClose }: SharePopoverProps) {
     setError(null);
     setCreatedUrl(null);
     setExpirySeconds(String(DEFAULT_SECONDS));
-  }, [open, imageId]);
+  }, [open, originalImageId]);
 
   // Close popover when user clicks anywhere outside it
   useEffect(() => {
@@ -82,7 +86,7 @@ export function SharePopover({ imageId, open, onClose }: SharePopoverProps) {
     setLoading(true);
     try {
       const res = await Api.shareLinks.shareLinksCreate({
-        shareLinkCreate: { image: imageId, expirySeconds: formSeconds },
+        shareLinkCreate: { image: originalImageId, expirySeconds: formSeconds },
       });
       setCreatedUrl(res.url);
     } catch (err) {
