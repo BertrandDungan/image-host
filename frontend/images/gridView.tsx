@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
-import type { User } from "./api-client/models/User";
-import { ImagesRetrieveImageSizeEnum } from "./api-client/apis/ImagesApi";
-import { Api } from "./api";
+import type { User } from "../api-client/models/User";
+import { ImagesRetrieveImageSizeEnum } from "../api-client/apis/ImagesApi";
+import { Api } from "../api";
 
-function Images({ currentUser }: { currentUser: User | null }) {
+function GridView({ currentUser }: { currentUser: User | null }) {
   const [urls, setUrls] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -87,4 +87,4 @@ function Images({ currentUser }: { currentUser: User | null }) {
   );
 }
 
-export default Images;
+export default GridView;
