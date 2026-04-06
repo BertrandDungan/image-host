@@ -7,25 +7,27 @@ function Home() {
   const [userDebugOpen, setUserDebugOpen] = useState(false);
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center bg-slate-950 px-6 py-16">
-      <UserDebugModal
-        open={userDebugOpen}
-        onClose={() => setUserDebugOpen(false)}
-        setCurrentUser={setCurrentUser}
-      />
-      <button
-        type="button"
-        onClick={() => setUserDebugOpen(true)}
-        className="absolute right-4 top-4 rounded-lg border border-slate-700/80 bg-slate-900/50 px-3 py-1.5 text-xs font-medium text-slate-400 transition hover:border-slate-600 hover:bg-slate-800/60 hover:text-slate-200"
-      >
-        User debug
-      </button>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-slate-950 px-6 py-16">
       <div className="w-full max-w-lg rounded-2xl border border-slate-800/80 bg-slate-900/40 p-10 shadow-xl shadow-black/20 backdrop-blur-sm">
-        <h1 className="text-center text-3xl font-semibold tracking-tight text-slate-100 sm:text-4xl">
-          {currentUser
-            ? `Welcome ${currentUser.name}`
-            : "Welcome to Image Host"}
-        </h1>
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          <h1 className="text-center text-3xl font-semibold tracking-tight text-slate-100 sm:text-4xl">
+            {currentUser
+              ? `Welcome ${currentUser.name}`
+              : "Welcome to Image Host"}
+          </h1>
+          <button
+            type="button"
+            onClick={() => setUserDebugOpen(true)}
+            className="shrink-0 rounded-lg border border-slate-700/80 bg-slate-900/50 px-3 py-1.5 text-xs font-medium text-slate-400 transition hover:border-slate-600 hover:bg-slate-800/60 hover:text-slate-200"
+          >
+            {currentUser ? "Select another user" : "Select a user"}
+          </button>
+          <UserDebugModal
+            open={userDebugOpen}
+            onClose={() => setUserDebugOpen(false)}
+            setCurrentUser={setCurrentUser}
+          />
+        </div>
         <p className="mt-3 text-center text-sm text-slate-400">
           Cheap basic image hosting
         </p>

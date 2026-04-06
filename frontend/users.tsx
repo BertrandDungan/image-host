@@ -72,10 +72,9 @@ export function UserDebugModal({
           )}
           {!loading && !error && users.length > 0 && (
             <div className="overflow-x-auto rounded-xl border border-slate-800/80">
-              <table className="w-full min-w-[480px] border-collapse text-left text-sm text-slate-200">
+              <table className="w-full min-w-[400px] border-collapse text-left text-sm text-slate-200">
                 <thead>
                   <tr className="border-b border-slate-800/80 bg-slate-950/50">
-                    <th className="px-4 py-3 font-medium text-slate-400">ID</th>
                     <th className="px-4 py-3 font-medium text-slate-400">
                       Name
                     </th>
@@ -93,9 +92,6 @@ export function UserDebugModal({
                       key={u.id}
                       className="border-b border-slate-800/60 last:border-0"
                     >
-                      <td className="px-4 py-3 tabular-nums text-slate-300">
-                        {u.id}
-                      </td>
                       <td className="px-4 py-3 text-slate-100">{u.name}</td>
                       <td className="px-4 py-3 text-slate-300">
                         {u.accountTier}
@@ -109,7 +105,7 @@ export function UserDebugModal({
                           }}
                           className="rounded-lg bg-sky-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm transition hover:bg-sky-500"
                         >
-                          Set current
+                          Set user
                         </button>
                       </td>
                     </tr>
