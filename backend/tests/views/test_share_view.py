@@ -2,6 +2,7 @@ from datetime import timedelta
 from typing import Any
 
 from django.conf import settings
+from django.urls import reverse
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APIRequestFactory
@@ -50,7 +51,11 @@ class ShareLinkViewSetTests(StubMediaTestCase):
         self.assertLessEqual(link.expiry, after + timedelta(seconds=600))
         self.assertEqual(response.data["id"], link.pk)
         self.assertEqual(response.data["image"], image.pk)
-        self.assertEqual(response.data["expiry"], link.expiry.isoformat().replace("+00:00", "Z"))
+        self.assertEqual(
+            response.data["expiry"], link.expiry.isoformat().replace("+00:00", "Z")
+        )
+        expected_url = reverse("share_link-detail", kwargs={"pk": link.pk})
+        self.assertEqual(response.data["url"], f"http://testserver{expected_url}")
 
     def test_create_accepts_minimum_expiry_seconds(self) -> None:
         image = self._create_image()

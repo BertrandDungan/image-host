@@ -1,6 +1,7 @@
 from datetime import timedelta
-from typing import Any
+from typing import Any, cast
 
+from django.urls import reverse
 from django.utils import timezone
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
@@ -27,6 +28,25 @@ class Share_LinkSerializer(serializers.ModelSerializer[Share_Link]):
         fields = ["id", "image", "expiry"]
 
 
+class ShareLinkCreateResponseSerializer(Share_LinkSerializer):
+    """Share link row as returned after create, including the GET URL for this link."""
+
+    url = serializers.SerializerMethodField(
+        help_text="Absolute URL for GET /api/share-links/{id}/ (retrieve shared image).",
+    )
+
+    class Meta:
+        model = Share_Link
+        fields = ["id", "image", "expiry", "url"]
+
+    def get_url(self, obj: Share_Link) -> str:
+        path = reverse("share_link-detail", kwargs={"pk": obj.pk})
+        request = self.context.get("request")
+        if request is not None:
+            return cast(str, request.build_absolute_uri(path))
+        return path
+
+
 class ShareLinkCreateSerializer(serializers.Serializer[Any]):
     """JSON body to create a time-limited share link for an image."""
 
@@ -48,7 +68,7 @@ class ShareLinkCreateSerializer(serializers.Serializer[Any]):
         )
 
     def to_representation(self, instance: Share_Link) -> dict[str, Any]:
-        return Share_LinkSerializer(instance).data
+        return ShareLinkCreateResponseSerializer(instance, context=self.context).data
 
 
 class ShareLinkErrorSerializer(serializers.Serializer[Any]):

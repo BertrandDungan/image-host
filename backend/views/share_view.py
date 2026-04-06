@@ -10,8 +10,8 @@ from rest_framework.response import Response
 from backend.models import Share_Link
 from backend.serializer import (
     ImageSerializer,
+    ShareLinkCreateResponseSerializer,
     ShareLinkCreateSerializer,
-    Share_LinkSerializer,
     ShareLinkErrorSerializer,
 )
 
@@ -34,7 +34,7 @@ class ShareLinkViewSet(
         request=ShareLinkCreateSerializer,
         responses={
             status.HTTP_201_CREATED: OpenApiResponse(
-                response=Share_LinkSerializer,
+                response=ShareLinkCreateResponseSerializer,
                 description="Share link was created.",
             ),
             status.HTTP_400_BAD_REQUEST: OpenApiResponse(
