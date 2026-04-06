@@ -17,7 +17,9 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-RUN uv run python manage.py migrate --noinput
+RUN uv run manage.py migrate --noinput
+
+RUN uv run manage.py seed
 
 EXPOSE 8000
 
