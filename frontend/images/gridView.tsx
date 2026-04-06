@@ -9,6 +9,7 @@ import {
 import { Api } from "../api";
 import type { ImageListItem } from "../api-client/models/ImageListItem";
 import FullImage from "./fullImage";
+import ImageGridItem from "./gridItem";
 
 type imageState = {
   smallThumbnails: ImageListItem[] | null;
@@ -283,55 +284,14 @@ function GridView({ currentUser }: { currentUser: User | null }) {
                 const originalUrl = images.originals?.[index]?.url;
 
                 return (
-                  <div
+                  <ImageGridItem
                     key={item.id}
-                    className="flex flex-col items-center gap-2 justify-self-center"
-                  >
-                    {originalUrl !== undefined ? (
-                      <button
-                        type="button"
-                        onClick={() => setViewerUrl(originalUrl)}
-                        className="h-auto w-auto max-w-full cursor-pointer rounded-lg border border-slate-800/80 object-contain p-0 transition hover:border-slate-600"
-                        style={{
-                          maxWidth: thumbMax,
-                          maxHeight: thumbMax,
-                        }}
-                        aria-label="View full-size image"
-                      >
-                        <img
-                          src={item.url}
-                          alt=""
-                          loading="lazy"
-                          className="h-auto max-h-full w-auto max-w-full rounded-lg object-contain"
-                          style={{
-                            maxWidth: thumbMax,
-                            maxHeight: thumbMax,
-                          }}
-                        />
-                      </button>
-                    ) : (
-                      <img
-                        src={item.url}
-                        alt=""
-                        loading="lazy"
-                        className="h-auto w-auto max-w-full rounded-lg border border-slate-800/80 object-contain"
-                        style={{
-                          maxWidth: thumbMax,
-                          maxHeight: thumbMax,
-                        }}
-                      />
-                    )}
-                    <button
-                      type="button"
-                      disabled={!shareEnabled}
-                      className="rounded-lg border border-slate-600 bg-transparent px-3 py-1 text-center text-xs font-medium text-slate-200 transition hover:border-slate-500 hover:bg-slate-800/60 disabled:cursor-not-allowed disabled:opacity-40"
-                      aria-label={
-                        shareEnabled ? "Share image" : "Share (Enterprise only)"
-                      }
-                    >
-                      Share
-                    </button>
-                  </div>
+                    item={item}
+                    thumbMax={thumbMax}
+                    originalUrl={originalUrl}
+                    shareEnabled={shareEnabled}
+                    onViewFull={setViewerUrl}
+                  />
                 );
               })}
             </div>

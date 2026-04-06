@@ -1,5 +1,6 @@
 import { UsersApi } from "./api-client/apis/UsersApi";
 import { ImagesApi } from "./api-client/apis/ImagesApi";
+import { ShareLinksApi } from "./api-client/apis/ShareLinksApi";
 import { Configuration, type Middleware } from "./api-client/runtime";
 
 function readCookie(name: string): string | undefined {
@@ -29,4 +30,5 @@ const config = new Configuration({
 export const Api = {
   users: new UsersApi(config),
   images: new ImagesApi(config),
+  shareLinks: new ShareLinksApi(config),
 };
