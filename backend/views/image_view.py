@@ -27,12 +27,6 @@ _FILENAME_FIELD = "filename"
 
 
 class ImageView(APIView):
-    class _ValidatedPutPayload(NamedTuple):
-        owner: User
-        title: str
-        raw: bytes
-        image_format: str
-
     parser_classes = [MultiPartParser]
 
     @extend_schema(
@@ -61,6 +55,12 @@ class ImageView(APIView):
             return error
         assert payload is not None
         return self._save_validated_image(payload)
+
+    class _ValidatedPutPayload(NamedTuple):
+        owner: User
+        title: str
+        raw: bytes
+        image_format: str
 
     def _validate_put(
         self, request: Request
