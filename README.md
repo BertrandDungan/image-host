@@ -74,5 +74,12 @@ Finally, Enterprise users can create time limited share links. If you click on `
 
 ## Technical details
 
-uv run manage.py spectacular --file schema.yml
-npm run generate-api
+### API and Schema generation
+
+The API schema is automatically generated via `uv run manage.py spectacular --file schema.yml`. And then frontend API client is generated from that schema via `npm run generate-api`.
+
+### Missing details and things I'd change
+
+This project is generally not ready for production. The Django settings are not configured appropriately, images can be accessed by any user since there's no auth check, and the lack of filtering/pagination means that the images list would probably fall over if enough images were uploaded and requested. Those are all relatively essential things to address this were to be expanded.
+
+While not essential, if I had external resources I would definitely prefer to store image files on AWS rather than locally on the server. This would scaling easier, make access control simpler, and would let us leverage existing API features like expiring links for the share links.
