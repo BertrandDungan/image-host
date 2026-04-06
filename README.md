@@ -36,7 +36,7 @@ Tests are run via `npm run test`.
 
 ## Using Image Host
 
-[main](.assets/main.png)
+![main](.assets/main.png)
 
 ## Technical details
 
