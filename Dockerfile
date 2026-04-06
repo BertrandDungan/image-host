@@ -12,7 +12,7 @@ COPY pyproject.toml uv.lock .python-version ./
 RUN uv sync --frozen --no-dev
 
 COPY package.json package-lock.json ./
-RUN npm install --omit=dev
+RUN npm install
 
 COPY . .
 RUN npm run build
