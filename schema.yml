@@ -77,6 +77,72 @@ paths:
               schema:
                 $ref: '#/components/schemas/ImagePutError'
           description: 'Input validation failure. Failure reason is under `detail` '
+  /api/share-links/:
+    post:
+      operationId: share_links_create
+      description: Creates a `Share_Link` for the given image. Expiry is computed
+        from now plus `expiry_seconds`.
+      summary: Create share link
+      tags:
+      - share-links
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShareLinkCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ShareLinkCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ShareLinkCreate'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Share_Link'
+          description: Share link was created.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShareLinkError'
+          description: Invalid request body or unknown image id.
+  /api/share-links/{id}/:
+    get:
+      operationId: share_links_retrieve
+      description: Returns the `Image` referenced by this share link. The path `id`
+        is the share link id, not the image id. Responds with 404 if the link does
+        not exist or `expiry` is in the past.
+      summary: Get image via share link
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this share_ link.
+        required: true
+      tags:
+      - share-links
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Image'
+          description: The shared image.
+        '404':
+          description: Unknown share link, or the link has expired.
   /api/users/:
     get:
       operationId: users_list
@@ -130,6 +196,28 @@ components:
         * `Basic` - Basic
         * `Premium` - Premium
         * `Enterprise` - Enterprise
+    Image:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 255
+        owner:
+          type: integer
+        image:
+          type: string
+          format: uri
+        size:
+          $ref: '#/components/schemas/SizeEnum'
+      required:
+      - id
+      - image
+      - owner
+      - size
+      - title
     ImageGetUrlsResponse:
       type: object
       description: JSON body listing absolute URLs for the requested size.
@@ -167,6 +255,53 @@ components:
       - filename
       - image
       - user_id
+    ShareLinkCreate:
+      type: object
+      description: JSON body to create a time-limited share link for an image.
+      properties:
+        image:
+          type: integer
+          description: Primary key of the image to share.
+        expiry_seconds:
+          type: integer
+          maximum: 30000
+          minimum: 300
+          description: Seconds until the link expires (inclusive range 300–30000).
+      required:
+      - expiry_seconds
+      - image
+    ShareLinkError:
+      type: object
+      description: Error body when share link creation validation fails.
+      properties:
+        detail:
+          type: string
+          description: Human-readable error.
+    Share_Link:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        image:
+          type: integer
+        expiry:
+          type: string
+          format: date-time
+      required:
+      - expiry
+      - id
+      - image
+    SizeEnum:
+      enum:
+      - '200'
+      - '400'
+      - original
+      type: string
+      description: |-
+        * `200` - Small Thumbnail
+        * `400` - Medium Thumbnail
+        * `original` - Original
     User:
       type: object
       properties:

@@ -1,5 +1,7 @@
+from datetime import timedelta
 from typing import Any
 
+from django.utils import timezone
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
@@ -23,6 +25,39 @@ class Share_LinkSerializer(serializers.ModelSerializer[Share_Link]):
     class Meta:
         model = Share_Link
         fields = ["id", "image", "expiry"]
+
+
+class ShareLinkCreateSerializer(serializers.Serializer[Any]):
+    """JSON body to create a time-limited share link for an image."""
+
+    image = serializers.PrimaryKeyRelatedField(
+        queryset=Image.objects.all(),
+        help_text="Primary key of the image to share.",
+    )
+    expiry_seconds = serializers.IntegerField(
+        min_value=300,
+        max_value=30000,
+        help_text="Seconds until the link expires (inclusive range 300–30000).",
+    )
+
+    def create(self, validated_data: dict[str, Any]) -> Share_Link:
+        expiry = timezone.now() + timedelta(seconds=validated_data["expiry_seconds"])
+        return Share_Link.objects.create(
+            image=validated_data["image"],
+            expiry=expiry,
+        )
+
+    def to_representation(self, instance: Share_Link) -> dict[str, Any]:
+        return Share_LinkSerializer(instance).data
+
+
+class ShareLinkErrorSerializer(serializers.Serializer[Any]):
+    """Error body when share link creation validation fails."""
+
+    detail = serializers.CharField(
+        required=False,
+        help_text="Human-readable error.",
+    )
 
 
 @extend_schema_field(OpenApiTypes.BINARY)

@@ -21,11 +21,12 @@ from django.contrib import admin
 from django.urls import path, include
 from backend.views.react_view import ReactView
 from rest_framework.routers import DefaultRouter
-from backend.views import user_view, image_view
+from backend.views import image_view, share_view, user_view
 from drf_spectacular.views import SpectacularSwaggerView
 
 router = DefaultRouter()
 router.register(r"users", user_view.UserViewSet)
+router.register(r"share-links", share_view.ShareLinkViewSet)
 
 urlpatterns = [
     path("__reload__/", include("django_browser_reload.urls")),

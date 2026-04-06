@@ -96,13 +96,13 @@ class ImageView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        size_raw = request.query_params.get(_IMAGE_SIZE_QUERY)
-        if size_raw is None or size_raw == "":
+        size = request.query_params.get(_IMAGE_SIZE_QUERY)
+        if size is None or size == "":
             return Response(
                 {"detail": f"Missing '{_IMAGE_SIZE_QUERY}' query parameter."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        if size_raw not in ImageSize.values:
+        if size not in ImageSize.values:
             return Response(
                 {"detail": f"Invalid '{_IMAGE_SIZE_QUERY}'."},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -116,7 +116,7 @@ class ImageView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        if size_raw in _PREMIUM_SIZE_VALUES:
+        if size in _PREMIUM_SIZE_VALUES:
             if user.account_tier not in (
                 AccountTier.PREMIUM,
                 AccountTier.ENTERPRISE,
@@ -133,9 +133,7 @@ class ImageView(APIView):
 
         urls = [
             request.build_absolute_uri(row.image.url)
-            for row in Image.objects.filter(owner_id=user_id, size=size_raw).order_by(
-                "id"
-            )
+            for row in Image.objects.filter(owner_id=user_id, size=size).order_by("id")
         ]
         return Response({"urls": urls})
 
