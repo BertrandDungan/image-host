@@ -54,13 +54,22 @@ function Home({
               View images
             </button>
           )}
-          <button
-            type="button"
-            disabled={!currentUser}
-            className="rounded-lg bg-sky-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-sky-500 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-sky-600"
-          >
-            Upload images
-          </button>
+          {currentUser ? (
+            <Link
+              to="/image-upload"
+              className="rounded-lg bg-sky-600 px-5 py-2.5 text-center text-sm font-medium text-white shadow-sm transition hover:bg-sky-500"
+            >
+              Upload images
+            </Link>
+          ) : (
+            <button
+              type="button"
+              disabled
+              className="rounded-lg bg-sky-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-sky-500 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-sky-600"
+            >
+              Upload images
+            </button>
+          )}
         </div>
       </div>
     </div>
