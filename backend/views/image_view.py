@@ -7,6 +7,7 @@ from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db import transaction
 from PIL import Image as PILImage, UnidentifiedImageError
+from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework.parsers import MultiPartParser
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -15,6 +16,7 @@ from rest_framework import status
 from uuid import uuid4
 
 from backend.models import MAX_STRING_LENGTH, Image, ImageSize, User
+from backend.serializer import ImagePutErrorSerializer, ImagePutRequestSerializer
 
 _ALLOWED_PIL_FORMATS = frozenset({"PNG", "JPEG"})
 _SMALL_THUMB_MAX_PX = 150
@@ -33,6 +35,26 @@ class ImageView(APIView):
 
     parser_classes = [MultiPartParser]
 
+    @extend_schema(
+        summary="Upload image",
+        description=(
+            "Multipart upload that creates three `Image` objects (small thumbnail, "
+            "medium thumbnail, and original)"
+        ),
+        tags=["images"],
+        request=ImagePutRequestSerializer,
+        responses={
+            status.HTTP_204_NO_CONTENT: OpenApiResponse(
+                description="Three image variants were stored successfully.",
+            ),
+            status.HTTP_400_BAD_REQUEST: OpenApiResponse(
+                response=ImagePutErrorSerializer,
+                description=(
+                    "Input validation failure. Failure reason is under `detail` "
+                ),
+            ),
+        },
+    )
     def put(self, request: Request) -> Response:
         payload, error = self._validate_put(request)
         if error is not None:
@@ -125,7 +147,7 @@ class ImageView(APIView):
             None,
         )
 
-    def _thumbnail_bytes(self, raw: bytes, max_dimension: int) -> bytes:
+    def _resize_thumbnail(self, raw: bytes, max_dimension: int, format: str) -> bytes:
         """
         Scales image down in place to a thumbnail square of a maximum size
         """
@@ -133,14 +155,15 @@ class ImageView(APIView):
         with PILImage.open(BytesIO(raw)) as img:
             img.load()
             img.thumbnail((max_dimension, max_dimension))
-            img.save(out)
+            img.save(out, format)
         return out.getvalue()
 
     def _save_validated_image(
         self, payload: ImageView._ValidatedPutPayload
     ) -> Response:
-        medium_bytes = self._thumbnail_bytes(payload.raw, _MEDIUM_THUMB_MAX_PX)
-        small_bytes = self._thumbnail_bytes(payload.raw, _SMALL_THUMB_MAX_PX)
+        format = payload.image_format.lower()
+        medium_bytes = self._resize_thumbnail(payload.raw, _MEDIUM_THUMB_MAX_PX, format)
+        small_bytes = self._resize_thumbnail(payload.raw, _SMALL_THUMB_MAX_PX, format)
 
         variants: tuple[tuple[ImageSize, bytes], ...] = (
             (ImageSize.SMALL_THUMBNAIL, small_bytes),
@@ -157,7 +180,7 @@ class ImageView(APIView):
                         owner=payload.owner,
                         size=size,
                     )
-                    storage_name = f"{base_id}_{size}.{payload.image_format.lower()}"
+                    storage_name = f"{base_id}_{size}.{format}"
                     instance.image.save(storage_name, ContentFile(data), save=False)
                     instance.full_clean()
                     instance.save()

@@ -3,6 +3,33 @@ info:
   title: Image-host
   version: 0.0.0
 paths:
+  /api/images/:
+    put:
+      operationId: images_update
+      description: Multipart upload that creates three `Image` objects (small thumbnail,
+        medium thumbnail, and original)
+      summary: Upload image
+      tags:
+      - images
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ImagePutRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: Three image variants were stored successfully.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImagePutError'
+          description: 'Input validation failure. Failure reason is under `detail` '
   /api/users/:
     get:
       operationId: users_list
@@ -56,6 +83,31 @@ components:
         * `Basic` - Basic
         * `Premium` - Premium
         * `Enterprise` - Enterprise
+    ImagePutError:
+      type: object
+      description: Error body when validation fails before persistence.
+      properties:
+        detail:
+          type: string
+          description: Human-readable error.
+    ImagePutRequest:
+      type: object
+      description: Multipart body for uploading an image.
+      properties:
+        user_id:
+          type: integer
+          description: ID of the user who will own the uploaded image.
+        filename:
+          type: string
+          maxLength: 255
+        image:
+          type: string
+          format: binary
+          description: Image file. Only PNG and JPEG are accepted.
+      required:
+      - filename
+      - image
+      - user_id
     User:
       type: object
       properties:

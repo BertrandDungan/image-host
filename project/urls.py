@@ -19,11 +19,11 @@ from django.contrib import admin
 from django.urls import path, include
 from backend.views.react_view import ReactView
 from rest_framework.routers import DefaultRouter
-from backend.views.user_view import UserViewSet
+from backend.views import user_view, image_view
 from drf_spectacular.views import SpectacularSwaggerView
 
 router = DefaultRouter()
-router.register(r"users", UserViewSet)
+router.register(r"users", user_view.UserViewSet)
 
 urlpatterns = [
     path("__reload__/", include("django_browser_reload.urls")),
@@ -34,6 +34,7 @@ urlpatterns = [
         name="swagger-ui",
     ),
     path("api/", include((router.urls))),
+    path("api/images/", image_view.ImageView.as_view(), name="images"),
     path("", ReactView.as_view(), name="index"),
     path(r"<path:path>", ReactView.as_view(), name="index_with_path"),
 ]
