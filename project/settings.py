@@ -135,7 +135,8 @@ STATICFILES_DIRS = [
 ]
 
 # File storage location alongside static assets
-MEDIA_ROOT = BASE_DIR / "dist" / "images"
+MEDIA_ROOT = BASE_DIR / "dist"
+MEDIA_URL = "/images/"
 
 
 # Default primary key field type

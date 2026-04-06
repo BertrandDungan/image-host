@@ -15,6 +15,8 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 from backend.views.react_view import ReactView
@@ -35,6 +37,7 @@ urlpatterns = [
     ),
     path("api/", include((router.urls))),
     path("api/images/", image_view.ImageView.as_view(), name="images"),
+    *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),
     path("", ReactView.as_view(), name="index"),
     path(r"<path:path>", ReactView.as_view(), name="index_with_path"),
 ]
