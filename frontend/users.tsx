@@ -17,19 +17,23 @@ export function UserDebugModal({
 
   useEffect(() => {
     if (!open) return;
+    let cancelled = false;
     setLoading(true);
     setError(null);
     Api.users
       .usersList()
       .then((list) => {
-        setUsers(list);
+        if (!cancelled) setUsers(list);
       })
       .catch(() => {
-        setError("Could not load users");
+        if (!cancelled) setError("Could not load users");
       })
       .finally(() => {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       });
+    return () => {
+      cancelled = true;
+    };
   }, [open]);
 
   if (!open) return null;
