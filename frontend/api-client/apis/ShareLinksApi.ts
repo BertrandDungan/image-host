@@ -15,14 +15,11 @@
 
 import * as runtime from '../runtime';
 import type {
-  Image,
   ShareLinkCreate,
   ShareLinkCreateResponse,
   ShareLinkError,
 } from '../models/index';
 import {
-    ImageFromJSON,
-    ImageToJSON,
     ShareLinkCreateFromJSON,
     ShareLinkCreateToJSON,
     ShareLinkCreateResponseFromJSON,
@@ -127,23 +124,22 @@ export class ShareLinksApi extends runtime.BaseAPI {
     }
 
     /**
-     * Returns the `Image` referenced by this share link. The path `id` is the share link id, not the image id. Responds with 404 if the link does not exist or `expiry` is in the past.
+     * Redirects to the image URL referenced by this share link. The path `id` is the share link id, not the image id. Responds with 404 if the link does not exist or `expiry` is in the past.
      * Get image via share link
      */
-    async shareLinksRetrieveRaw(requestParameters: ShareLinksRetrieveRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Image>> {
+    async shareLinksRetrieveRaw(requestParameters: ShareLinksRetrieveRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
         const requestOptions = await this.shareLinksRetrieveRequestOpts(requestParameters);
         const response = await this.request(requestOptions, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => ImageFromJSON(jsonValue));
+        return new runtime.VoidApiResponse(response);
     }
 
     /**
-     * Returns the `Image` referenced by this share link. The path `id` is the share link id, not the image id. Responds with 404 if the link does not exist or `expiry` is in the past.
+     * Redirects to the image URL referenced by this share link. The path `id` is the share link id, not the image id. Responds with 404 if the link does not exist or `expiry` is in the past.
      * Get image via share link
      */
-    async shareLinksRetrieve(requestParameters: ShareLinksRetrieveRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Image> {
-        const response = await this.shareLinksRetrieveRaw(requestParameters, initOverrides);
-        return await response.value();
+    async shareLinksRetrieve(requestParameters: ShareLinksRetrieveRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.shareLinksRetrieveRaw(requestParameters, initOverrides);
     }
 
 }

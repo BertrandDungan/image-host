@@ -1,6 +1,6 @@
 from typing import Any
 
-from django.http import Http404
+from django.http import Http404, HttpResponseRedirect
 from django.utils import timezone
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import mixins, status, viewsets
@@ -9,7 +9,6 @@ from rest_framework.response import Response
 
 from backend.models import Share_Link
 from backend.serializer import (
-    ImageSerializer,
     ShareLinkCreateResponseSerializer,
     ShareLinkCreateSerializer,
     ShareLinkErrorSerializer,
@@ -18,7 +17,6 @@ from backend.serializer import (
 
 class ShareLinkViewSet(
     mixins.CreateModelMixin,
-    mixins.RetrieveModelMixin,
     viewsets.GenericViewSet[Share_Link],
 ):
     queryset = Share_Link.objects.select_related("image")
@@ -49,23 +47,24 @@ class ShareLinkViewSet(
     @extend_schema(
         summary="Get image via share link",
         description=(
-            "Returns the `Image` referenced by this share link. The path `id` is "
-            "the share link id, not the image id. Responds with 404 if the link "
-            "does not exist or `expiry` is in the past."
+            "Redirects to the image URL referenced by this share link. The path "
+            "`id` is the share link id, not the image id. Responds with 404 if "
+            "the link does not exist or `expiry` is in the past."
         ),
         tags=["share-links"],
         responses={
-            status.HTTP_200_OK: OpenApiResponse(
-                response=ImageSerializer,
-                description="The shared image.",
+            status.HTTP_302_FOUND: OpenApiResponse(
+                description="Redirects to the shared image URL.",
             ),
             status.HTTP_404_NOT_FOUND: OpenApiResponse(
                 description="Unknown share link, or the link has expired.",
             ),
         },
     )
-    def retrieve(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def retrieve(
+        self, _request: Request, *_args: Any, **_kwargs: Any
+    ) -> HttpResponseRedirect:
         link = self.get_object()
         if timezone.now() > link.expiry:
             raise Http404()
-        return Response(ImageSerializer(link.image).data)
+        return HttpResponseRedirect(link.image.image.url)

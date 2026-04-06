@@ -3,7 +3,6 @@ apis/ShareLinksApi.ts
 apis/UsersApi.ts
 apis/index.ts
 docs/AccountTierEnum.md
-docs/Image.md
 docs/ImageGetUrlsResponse.md
 docs/ImageListItem.md
 docs/ImagePutError.md
@@ -12,19 +11,16 @@ docs/ShareLinkCreate.md
 docs/ShareLinkCreateResponse.md
 docs/ShareLinkError.md
 docs/ShareLinksApi.md
-docs/SizeEnum.md
 docs/User.md
 docs/UsersApi.md
 index.ts
 models/AccountTierEnum.ts
-models/Image.ts
 models/ImageGetUrlsResponse.ts
 models/ImageListItem.ts
 models/ImagePutError.ts
 models/ShareLinkCreate.ts
 models/ShareLinkCreateResponse.ts
 models/ShareLinkError.ts
-models/SizeEnum.ts
 models/User.ts
 models/index.ts
 runtime.ts

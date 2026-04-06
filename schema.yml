@@ -118,9 +118,9 @@ paths:
   /api/share-links/{id}/:
     get:
       operationId: share_links_retrieve
-      description: Returns the `Image` referenced by this share link. The path `id`
-        is the share link id, not the image id. Responds with 404 if the link does
-        not exist or `expiry` is in the past.
+      description: Redirects to the image URL referenced by this share link. The path
+        `id` is the share link id, not the image id. Responds with 404 if the link
+        does not exist or `expiry` is in the past.
       summary: Get image via share link
       parameters:
       - in: path
@@ -136,12 +136,8 @@ paths:
       - basicAuth: []
       - {}
       responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Image'
-          description: The shared image.
+        '302':
+          description: Redirects to the shared image URL.
         '404':
           description: Unknown share link, or the link has expired.
   /api/users/:
@@ -197,28 +193,6 @@ components:
         * `Basic` - Basic
         * `Premium` - Premium
         * `Enterprise` - Enterprise
-    Image:
-      type: object
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        title:
-          type: string
-          maxLength: 255
-        owner:
-          type: integer
-        image:
-          type: string
-          format: uri
-        size:
-          $ref: '#/components/schemas/SizeEnum'
-      required:
-      - id
-      - image
-      - owner
-      - size
-      - title
     ImageGetUrlsResponse:
       type: object
       description: JSON body listing image ids and absolute URLs for the requested
@@ -314,16 +288,6 @@ components:
         detail:
           type: string
           description: Human-readable error.
-    SizeEnum:
-      enum:
-      - '200'
-      - '400'
-      - original
-      type: string
-      description: |-
-        * `200` - Small Thumbnail
-        * `400` - Medium Thumbnail
-        * `original` - Original
     User:
       type: object
       properties:

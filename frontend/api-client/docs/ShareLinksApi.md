@@ -86,11 +86,11 @@ example().catch(console.error);
 
 ## shareLinksRetrieve
 
-> Image shareLinksRetrieve(id)
+> shareLinksRetrieve(id)
 
 Get image via share link
 
-Returns the &#x60;Image&#x60; referenced by this share link. The path &#x60;id&#x60; is the share link id, not the image id. Responds with 404 if the link does not exist or &#x60;expiry&#x60; is in the past.
+Redirects to the image URL referenced by this share link. The path &#x60;id&#x60; is the share link id, not the image id. Responds with 404 if the link does not exist or &#x60;expiry&#x60; is in the past.
 
 ### Example
 
@@ -138,7 +138,7 @@ example().catch(console.error);
 
 ### Return type
 
-[**Image**](Image.md)
+`void` (Empty response body)
 
 ### Authorization
 
@@ -147,13 +147,13 @@ example().catch(console.error);
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: `application/json`
+- **Accept**: Not defined
 
 
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-| **200** | The shared image. |  -  |
+| **302** | Redirects to the shared image URL. |  -  |
 | **404** | Unknown share link, or the link has expired. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)

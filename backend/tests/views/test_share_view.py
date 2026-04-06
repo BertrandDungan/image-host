@@ -1,7 +1,6 @@
 from datetime import timedelta
 from typing import Any
 
-from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
 from rest_framework import status
@@ -100,22 +99,15 @@ class ShareLinkViewSetTests(StubMediaTestCase):
         self.assertIn("expiry_seconds", response.data)
         self.assertEqual(Share_Link.objects.count(), 0)
 
-    def test_retrieve_returns_200_and_image_payload(self) -> None:
+    def test_retrieve_redirects_to_image_url(self) -> None:
         image = self._create_image()
         link = Share_Link.objects.create(
             image=image,
             expiry=timezone.now() + timedelta(hours=1),
         )
         response = self._get_retrieve(link.pk)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["id"], image.pk)
-        self.assertEqual(response.data["title"], image.title)
-        self.assertEqual(response.data["owner"], self.user.pk)
-        self.assertEqual(response.data["size"], image.size)
-        self.assertEqual(
-            response.data["image"],
-            f"{settings.MEDIA_URL}{image.image.name}",
-        )
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertEqual(response["Location"], image.image.url)
 
     def test_retrieve_returns_404_for_unknown_share_link(self) -> None:
         response = self._get_retrieve(9_999_999)
