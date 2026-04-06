@@ -4,7 +4,7 @@ from rest_framework.fields import DateTimeField as DRFSerializerDateTimeField
 
 from backend.models import AccountTier, Image, ImageSize, Share_Link, User
 from backend.serializer import ImageSerializer, Share_LinkSerializer, UserSerializer
-from .stubs import stub_image_upload
+from .stubs import StubMediaTestCase, stub_image_upload
 
 
 class UserSerializerTests(TestCase):
@@ -32,7 +32,7 @@ class UserSerializerTests(TestCase):
         self.assertIn("account_tier", serializer.errors)
 
 
-class ImageSerializerTests(TestCase):
+class ImageSerializerTests(StubMediaTestCase):
     def test_serialize_outputs_expected_format(self) -> None:
         owner = User.objects.create(name="owner", account_tier=AccountTier.BASIC)
         image = Image.objects.create(
@@ -127,7 +127,7 @@ class ImageSerializerTests(TestCase):
         )
 
 
-class Share_LinkSerializerTests(TestCase):
+class Share_LinkSerializerTests(StubMediaTestCase):
     def setUp(self) -> None:
         self.owner = User.objects.create(name="o", account_tier=AccountTier.BASIC)
         self.image = Image.objects.create(

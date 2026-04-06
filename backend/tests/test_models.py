@@ -2,7 +2,7 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.utils import timezone
 from backend.models import AccountTier, Image, ImageSize, Share_Link, User
-from .stubs import stub_image_upload
+from .stubs import StubMediaTestCase, stub_image_upload
 
 
 class UserModelTests(TestCase):
@@ -41,7 +41,7 @@ class UserModelTests(TestCase):
         self.assertIn("account_tier", ctx.exception.error_dict)
 
 
-class ImageModelTests(TestCase):
+class ImageModelTests(StubMediaTestCase):
     def test_title_accepts_max_length(self) -> None:
         owner = User.objects.create(name="o", account_tier=AccountTier.BASIC)
         image = Image(
@@ -112,7 +112,7 @@ class ImageModelTests(TestCase):
         self.assertEqual(image.image.height, 1)
 
 
-class DeletionCascadeTests(TestCase):
+class DeletionCascadeTests(StubMediaTestCase):
     def test_deleting_user_cascades_to_images(self) -> None:
         user = User.objects.create(name="u", account_tier=AccountTier.BASIC)
         image = Image.objects.create(

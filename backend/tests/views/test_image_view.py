@@ -4,7 +4,6 @@ from typing import Any
 
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase
 from PIL import Image as PILImage
 from rest_framework import status
 from rest_framework.test import APIRequestFactory
@@ -13,14 +12,14 @@ from backend.models import MAX_STRING_LENGTH, AccountTier, Image, ImageSize, Use
 from backend.views.image_view import ImageView
 
 
-from ..stubs import stub_image_upload
+from ..stubs import StubMediaTestCase, stub_image_upload
 
 
 MEDIUM_PX = int(ImageSize.MEDIUM_THUMBNAIL)
 SMALL_PX = int(ImageSize.SMALL_THUMBNAIL)
 
 
-class ImageViewTests(TestCase):
+class ImageViewTests(StubMediaTestCase):
     def setUp(self) -> None:
         self.factory = APIRequestFactory()
         self.view = ImageView.as_view()
